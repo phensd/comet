@@ -5,7 +5,7 @@
 #include <iostream>
 #include <nlohmann/detail/exceptions.hpp>
 #include <nlohmann/json.hpp>
-
+#include <set>
 
 std::string music_player::filesystem::get_home_dir(){
     return (std::string) getenv("HOME") + "/";
@@ -85,7 +85,7 @@ bool music_player::filesystem::validate_filetype(const std::string& path){
 
 std::vector<std::string> music_player::filesystem::find_song_entries(std::vector<std::string> paths,music_player::logger& logger){
 
-    std::vector<std::string> to_return {};
+    std::set<std::string> to_return {};
 
     std::cerr << "If it takes a while to open, directories are probably being scanned slowly...";
 
@@ -110,7 +110,7 @@ std::vector<std::string> music_player::filesystem::find_song_entries(std::vector
                     //validate that we can actually use the filetype before we add it
                     if(validate_filetype(entry.path())){
                         logger.log("Found entry in " + path + " " +  (std::string) entry.path(),true);
-                        to_return.push_back(entry.path());
+                        to_return.insert(entry.path());
                     }else {
                         logger.log("Invalid audio format (cannot be read by miniaudio) - " + (std::string) entry.path(),true);
                     }
@@ -124,5 +124,5 @@ std::vector<std::string> music_player::filesystem::find_song_entries(std::vector
     }
 
     logger.log("No. entries found total " +  std::to_string(to_return.size()),true);
-    return to_return;
+    return {to_return.begin(),to_return.end()};
 }
