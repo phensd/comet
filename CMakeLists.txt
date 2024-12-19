@@ -15,18 +15,19 @@ FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download
 FetchContent_MakeAvailable(json)
 
 
-project(music_player CXX)
+project(comet CXX)
 find_package(ftxui 5 REQUIRED)
 
 
-add_executable(music_player filesystem.cpp main.cpp player.cpp logger.cpp util.cpp)
+add_executable(comet filesystem.cpp main.cpp player.cpp logger.cpp util.cpp)
 
 
 
-target_link_libraries(music_player
+target_link_libraries(comet
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component 
   PRIVATE nlohmann_json::nlohmann_json
 )
 
+install(TARGETS comet RUNTIME DESTINATION bin)
