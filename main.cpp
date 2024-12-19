@@ -146,6 +146,12 @@ int main() {
             return true;
         }
 
+        //even if the search bar isn't focused, clear it when pressing delete
+        if(event == Event::Delete){
+            engine.clear_search();
+            return true;
+        }
+
 
         //starting song
         if(event == Event::Return){
