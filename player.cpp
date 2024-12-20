@@ -3,26 +3,28 @@
 #include <algorithm>
 #include <cctype>
 #include <iterator>
+#include <random>
 #include "include/filesystem.h"
 
-void music_player::player::load_song_into_current(std::string file_path,logger& logger){
-    ma_sound_init_from_file(&this->engine, file_path.c_str(), MA_SOUND_FLAG_STREAM,NULL,NULL,&this->current_song);
-    ma_sound_get_length_in_seconds(&this->current_song,&current_song_length_seconds);
 
-    std::string message {"Loaded song " + file_path + " --- Length (seconds) " + std::to_string(current_song_length_seconds)};
-    logger.log(message);
+
+void music_player::player::start_song(std::string file_path, logger& logger){
+
+     //if a song is playing unload it
+    if(!current_song_title.empty()){
+        ma_sound_uninit(&current_song);
+    } 
+
+    current_song_title = public_song_entries[selected];
+
+    ma_sound_init_from_file(&engine, file_path.c_str(), MA_SOUND_FLAG_STREAM,NULL,NULL,&current_song);
+    ma_sound_start(&current_song);
 }
 
-
-void music_player::player::start_song(std::string file_path, ma_sound& song,logger&logger){
-    load_song_into_current(file_path,logger);
-    ma_sound_start(&song);
-}
-
-void music_player::player::restart(ma_sound& song,logger& logger){
-    ma_sound_stop(&song);
-    ma_sound_seek_to_pcm_frame(&song,0);
-    ma_sound_start(&song);
+void music_player::player::restart(logger& logger){
+    ma_sound_stop(&current_song); //this may be redundant
+    ma_sound_seek_to_pcm_frame(&current_song,0);
+    ma_sound_start(&current_song);
 
     logger.log("Restarted song");
 }
@@ -37,19 +39,44 @@ void music_player::player::increase_volume(float value){
 
 
 
-void music_player::player::seek_percentage(ma_sound& song, float interval, bool forward) {
+void music_player::player::seek_percentage(float interval, bool forward) {
 
-    ma_sound_stop(&song);
+    ma_sound_stop(&current_song);
 
     ma_uint64 length {};
-    ma_sound_get_length_in_pcm_frames(&song, &length);
+    ma_sound_get_length_in_pcm_frames(&current_song, &length);
 
     forward ? 
-    ma_sound_seek_to_pcm_frame(&song,ma_sound_get_time_in_pcm_frames(&song) + (length*interval)):
-    ma_sound_seek_to_pcm_frame(&song,ma_sound_get_time_in_pcm_frames(&song) - (length*interval));
+    ma_sound_seek_to_pcm_frame(&current_song,ma_sound_get_time_in_pcm_frames(&current_song) + (length*interval)):
+    ma_sound_seek_to_pcm_frame(&current_song,ma_sound_get_time_in_pcm_frames(&current_song) - (length*interval));
     
-    ma_sound_start(&song);
+    ma_sound_start(&current_song);
 
+
+}
+
+std::string music_player::player::get_and_select_random_song(){
+    
+
+    static std::random_device dev;
+    static std::mt19937 rng(dev());
+    static std::uniform_int_distribution<std::mt19937::result_type> dist(0,public_song_entries.size()); 
+
+
+    auto num {dist(rng)};
+    selected = num;
+    return public_song_entries[num];
+
+}
+
+
+void music_player::player::on_song_end(logger& logger){
+
+    if(current_response_state == player::player_response_state::LOOP) restart(logger);
+    if(current_response_state == player::player_response_state::SHUFFLE) start_song(get_and_select_random_song(),logger);
+
+
+    return;
 
 }
 
@@ -60,7 +87,7 @@ void music_player::player::active_refresh(std::string_view current_song_display,
         //loop songs by default for now
         //todo: make this account for the player state (loop,shuffle,etc)
         if(ma_sound_at_end(&current_song)){
-            restart(current_song,logger);
+            on_song_end(logger);
         }
         //update volume of song
         ma_sound_set_volume(&current_song,get_volume());

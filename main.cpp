@@ -155,22 +155,15 @@ int main() {
 
         //starting song
         if(event == Event::Return){
-
             //if there are no songs to play do nothing!!!!!
             if(engine.public_song_entries.size() < 1 ) return true;
-
-            //if a song is playing stop it
-            if(!engine.current_song_title.empty()){
-                ma_sound_uninit(&engine.current_song);
-            } 
-            engine.current_song_title = (engine.public_song_entries)[engine.selected];
-            engine.start_song( (engine.public_song_entries)[engine.selected],engine.current_song,logger);
+            engine.start_song( engine.public_song_entries[engine.selected],logger);
             return true;
         }
 
         //restarting song
         if(event == Event::r){
-            if(!engine.current_song_title.empty()) engine.restart(engine.current_song,logger);
+            if(!engine.current_song_title.empty()) engine.restart(logger);
             return true;
         }
 
@@ -188,7 +181,11 @@ int main() {
 
         //pausing and unpausing (this is spacebar)
         if(event == Event::Character(' ')){
+            //no song playing, do nothing
             if(engine.current_song_title.empty()) return true;
+            //trying to unpause when a song is over will just restart it
+            if(ma_sound_at_end(&engine.current_song)) { engine.restart(logger); return true; };
+
 
             if(ma_sound_is_playing(&engine.current_song)){
                 ma_sound_stop(&engine.current_song);
@@ -209,23 +206,23 @@ int main() {
         if(!engine.current_song_title.empty()){
             //seek right
             if(event == Event::ArrowRight){
-                engine.seek_percentage(engine.current_song, 0.025f,true);
+                engine.seek_percentage(0.025f,true);
                 return true;
             }
 
             if(event == Event::ArrowRightCtrl){
-                engine.seek_percentage(engine.current_song, 0.075f,true);
+                engine.seek_percentage(0.075f,true);
                 return true;
             }
 
             //seek left
             if(event == Event::ArrowLeft){
-                engine.seek_percentage(engine.current_song, 0.025f,false);
+                engine.seek_percentage(0.025f,false);
                 return true;
             }
 
             if(event == Event::ArrowLeftCtrl){
-                engine.seek_percentage(engine.current_song, 0.075f,false);
+                engine.seek_percentage(0.075f,false);
                 return true;
             }
         }
@@ -275,7 +272,7 @@ int main() {
                     
                         text(engine.get_state_message()),
                         text(engine.current_song_title),
-                        border(gauge( (!engine.current_song_title.empty() ? ma_sound_get_time_in_milliseconds(&engine.current_song)/1000.0f / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
+                        border(gauge( (!engine.current_song_title.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
 
                     ) | flex,
                     //make progress bar align (sorta) with end of the panels
@@ -294,10 +291,13 @@ int main() {
     while (refresh_ui_continue) {
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(0.1s);
-        screen.Post(Event::Custom);
 
         //various things that need to refresh frequently 
-        engine.active_refresh(engine.current_song_title, logger, tab_values);
+        screen.Post( [&] { engine.active_refresh(engine.current_song_title, logger, tab_values);});
+        screen.Post(Event::Custom);
+
+
+
 
     }
   });

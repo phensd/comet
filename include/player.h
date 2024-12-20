@@ -32,20 +32,25 @@ namespace  music_player {
        
 
 
-        float current_song_stamp_milliseconds(ma_sound& song);
-        void start_song(std::string file_path,ma_sound& song,logger& logger);
-        void load_song_into_current(std::string file_path,logger& logger);
+        void start_song(std::string file_path,logger& logger);
 
         void increase_volume(float value);
-        float get_current_song_length_seconds() {return current_song_length_seconds;}
 
-        void restart(ma_sound& song,logger& logger);
+        float get_current_song_length_seconds() {float length; ma_sound_get_length_in_seconds(&current_song, &length); return length;}
+        double get_current_timestamp_seconds() { return ma_sound_get_time_in_milliseconds(&current_song)/1000.0f; };
 
-        void seek_percentage(ma_sound& song, float interval, bool forward);
+
+        void restart(logger& logger);
+
+        void seek_percentage(float interval, bool forward);
 
 
         void active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values);
         void refresh_entries(logger& logger);
+
+        void on_song_end(logger& logger);
+        std::string get_and_select_random_song();
+
 
         std::string get_state_message();
 
@@ -66,7 +71,6 @@ namespace  music_player {
 
         private:
             float volume {0.5f};
-            float current_song_length_seconds {};
 
             float max_volume {1.0f};
             float min_volume {0.015f};
