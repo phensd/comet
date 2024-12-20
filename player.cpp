@@ -86,8 +86,21 @@ void music_player::player::apply_search_filter(){
 }
 
 void music_player::player::clear_search(){
+
+    //save what song the user had as a selection before we clear the search
+    //if the current search resulted in an empty list, set the saved selection to the first element of the all-songs list
+    std::string saved_search_selection {public_song_entries.size() > 0 ? public_song_entries[selected] : all_song_entries[0]};
+
+    //clear the search input, then refresh the display
     current_search = "";
     public_song_entries = get_filtered_entries();
+
+    //After we clear the search, find the song that was previously selected in the new refreshed list and
+    //set the current selection to it
+    auto itr {std::find(public_song_entries.begin(),public_song_entries.end(),saved_search_selection)};
+    if(itr != public_song_entries.end()){
+        selected = (itr - public_song_entries.begin());
+    }
 }
 
 bool music_player::player::match_search_string (std::string input, std::string to_match){
