@@ -15,7 +15,7 @@ void music_player::player::start_song(std::string file_path, logger& logger){
         ma_sound_uninit(&current_song);
     } 
 
-    current_song_title = public_song_entries[selected];
+    current_song_title = file_path;
 
     ma_sound_init_from_file(&engine, file_path.c_str(), MA_SOUND_FLAG_STREAM,NULL,NULL,&current_song);
     ma_sound_start(&current_song);
