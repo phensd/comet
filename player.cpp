@@ -58,9 +58,10 @@ void music_player::player::seek_percentage(float interval, bool forward) {
 std::string music_player::player::get_and_select_random_song(){
     
 
+
     static std::random_device dev;
     static std::mt19937 rng(dev());
-    static std::uniform_int_distribution<std::mt19937::result_type> dist(0,public_song_entries.size()); 
+    std::uniform_int_distribution<std::mt19937::result_type> dist(0,public_song_entries.size()); 
 
 
     auto num {dist(rng)};
@@ -71,13 +72,12 @@ std::string music_player::player::get_and_select_random_song(){
 
 
 void music_player::player::on_song_end(logger& logger){
-
     if(current_response_state == player::player_response_state::LOOP) restart(logger);
     if(current_response_state == player::player_response_state::SHUFFLE) start_song(get_and_select_random_song(),logger);
-
-
-    return;
-
+    if(current_response_state == player::player_response_state::PLAY_NEXT){
+        if(selected + 1 >= public_song_entries.size()-1) selected = -1;
+        start_song(public_song_entries[++selected],logger);
+    }
 }
 
 //various things to update in real time
@@ -202,7 +202,7 @@ std::string music_player::player::get_state_message(){
 
 void music_player::player::toggle_player_state(music_player::player::player_response_state desired_state){
     if(current_response_state == desired_state){
-        current_response_state = music_player::player::player_response_state::DO_NOTHING_WHEN_SONG_IS_OVER;
+        current_response_state = music_player::player::player_response_state::PLAY_NEXT;
     }else{
         current_response_state = desired_state;
     }

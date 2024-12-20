@@ -11,10 +11,10 @@ namespace  music_player {
         enum class player_response_state {
             LOOP,
             SHUFFLE,
-            DO_NOTHING_WHEN_SONG_IS_OVER
+            PLAY_NEXT
         };
 
-        player_response_state current_response_state {player::player_response_state::LOOP};
+        player_response_state current_response_state {player::player_response_state::PLAY_NEXT};
 
 
         ma_engine engine;
@@ -93,7 +93,7 @@ namespace  music_player {
             std::map<player_response_state,std::string> map_player_state_to_string {
                 {player_response_state::LOOP, "[Loop]"},  
                 {player_response_state::SHUFFLE, "[Shuffle]"},  
-                {player_response_state::DO_NOTHING_WHEN_SONG_IS_OVER, ""},  
+                {player_response_state::PLAY_NEXT, ""},  
             };
 
 
