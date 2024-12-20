@@ -30,4 +30,7 @@ target_link_libraries(comet
   PRIVATE nlohmann_json::nlohmann_json
 )
 
+
+
+set_property(TARGET comet PROPERTY CXX_STANDARD 20)
 install(TARGETS comet RUNTIME DESTINATION bin)
