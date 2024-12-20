@@ -175,11 +175,12 @@ int main() {
         }
 
         //toggling states
+        //loop
         if(event == Event::l){
             engine.toggle_player_state(music_player::player::player_response_state::LOOP);
             return true;
         }
-
+        //shuffle
         if(event == Event::s){
             engine.toggle_player_state(music_player::player::player_response_state::SHUFFLE);
             return true;

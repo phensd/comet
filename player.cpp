@@ -58,6 +58,7 @@ void music_player::player::active_refresh(std::string_view current_song_display,
     
     if(!current_song_display.empty()) {
         //loop songs by default for now
+        //todo: make this account for the player state (loop,shuffle,etc)
         if(ma_sound_at_end(&current_song)){
             restart(current_song,logger);
         }
@@ -166,6 +167,7 @@ std::string music_player::player::get_state_message(){
     //otherwise, say the player is playing a song
     std::string to_return {"Playing"};
 
+    //add the current state (looping, shuffling) to the text
     to_return += " " + map_player_state_to_string[current_response_state];
 
     return to_return;
