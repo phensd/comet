@@ -174,6 +174,17 @@ int main() {
             return true;
         }
 
+        //toggling states
+        if(event == Event::l){
+            engine.toggle_player_state(music_player::player::player_response_state::LOOP);
+            return true;
+        }
+
+        if(event == Event::s){
+            engine.toggle_player_state(music_player::player::player_response_state::SHUFFLE);
+            return true;
+        }
+
         //pausing and unpausing (this is spacebar)
         if(event == Event::Character(' ')){
             if(engine.current_song_title.empty()) return true;
@@ -261,7 +272,8 @@ int main() {
                 hbox(
                     vbox(
                     
-                        text("Playing: " + (std::string) (!engine.current_song_title.empty() && !ma_sound_is_playing(&engine.current_song) ? "(Paused)" : " ")),text(engine.current_song_title),
+                        text(engine.get_state_message()),
+                        text(engine.current_song_title),
                         border(gauge( (!engine.current_song_title.empty() ? ma_sound_get_time_in_milliseconds(&engine.current_song)/1000.0f / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
 
                     ) | flex,

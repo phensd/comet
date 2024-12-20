@@ -152,6 +152,34 @@ std::vector<std::string> music_player::player::get_default_path_entries(){
     return defaults;
 }
 
+std::string music_player::player::get_state_message(){
+    //if nothing is selected or playing say nothing
+    if(current_song_title.empty() && !ma_sound_is_playing(&current_song)){
+        return "";
+    }
+
+    //on the flip side, if something is selected to be played, but nothing is playing through mAudio, say the player is paused
+    if(!current_song_title.empty() && !ma_sound_is_playing(&current_song)){
+        return "Paused";
+    }
+
+    //otherwise, say the player is playing a song
+    std::string to_return {"Playing"};
+
+    to_return += " " + map_player_state_to_string[current_response_state];
+
+    return to_return;
+}
+
+void music_player::player::toggle_player_state(music_player::player::player_response_state desired_state){
+    if(current_response_state == desired_state){
+        current_response_state = music_player::player::player_response_state::DO_NOTHING_WHEN_SONG_IS_OVER;
+    }else{
+        current_response_state = desired_state;
+    }
+}
+
+
 music_player::player::player(logger& logger){
 
     ma_result result;

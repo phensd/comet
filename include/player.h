@@ -2,13 +2,24 @@
 #include "../vendor/miniaudio.h"
 #include <vector>
 #include "logger.h"
-
+#include <map>
 
 namespace  music_player {
 
     struct player {
+
+        enum class player_response_state {
+            LOOP,
+            SHUFFLE,
+            DO_NOTHING_WHEN_SONG_IS_OVER
+        };
+
+        player_response_state current_response_state {player::player_response_state::LOOP};
+
+
         ma_engine engine;
         ma_sound current_song;
+
 
         std::string current_song_title{};
         std::string current_search {};
@@ -36,6 +47,7 @@ namespace  music_player {
         void active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values);
         void refresh_entries(logger& logger);
 
+        std::string get_state_message();
 
 
 
@@ -47,6 +59,7 @@ namespace  music_player {
 
         void clear_search();
 
+        void toggle_player_state(player_response_state desired_state);
 
         player(logger& logger);
         ~player();
@@ -70,6 +83,15 @@ namespace  music_player {
             bool match_search_string (std::string input, std::string to_match);
 
             std::vector<std::string> get_default_path_entries();
+
+
+
+            std::map<player_response_state,std::string> map_player_state_to_string {
+                {player_response_state::LOOP, "[Loop]"},  
+                {player_response_state::SHUFFLE, "[Shuffle]"},  
+                {player_response_state::DO_NOTHING_WHEN_SONG_IS_OVER, ""},  
+            };
+
 
 
 
