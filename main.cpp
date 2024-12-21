@@ -157,7 +157,7 @@ int main() {
         if(event == Event::Return){
             //if there are no songs to play do nothing!!!!!
             if(engine.public_song_entries.size() < 1 ) return true;
-            engine.start_song( engine.public_song_entries[engine.selected],logger);
+            engine.start_song( engine.public_song_entries.begin() + engine.selected,logger);
             return true;
         }
 

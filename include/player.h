@@ -26,9 +26,12 @@ namespace  music_player {
 
             std::vector<std::string> get_default_path_entries();
 
-            std::string get_and_select_random_song();
+            std::vector<std::string>::iterator get_and_select_random_song();
 
-            void visually_select_by_name(std::string_view to_select);
+
+            //since this is a one liner now we can put it in the header by my own standards
+            void visually_select(std::vector<std::string>::iterator itr) {selected = itr - public_song_entries.begin();}
+
 
 
             ma_engine engine;
@@ -56,7 +59,7 @@ namespace  music_player {
             std::vector<std::string> public_song_entries{};
 
 
-            void start_song(std::string file_path,logger& logger);
+            void start_song(std::vector<std::string>::iterator song_title_itr,logger& logger);
 
             void increase_volume(float value);
 

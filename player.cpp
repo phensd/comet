@@ -8,29 +8,22 @@
 
 
 
-void music_player::player::start_song(std::string file_path, logger& logger){
+void music_player::player::start_song(std::vector<std::string>::iterator song_title_itr, logger& logger){
      //if a song is playing unload it
     if(!current_song_title.empty()){
         ma_sound_stop(&current_song);
         ma_sound_uninit(&current_song);
     } 
 
-    current_song_title = file_path;
+    current_song_title = *song_title_itr;
 
-    ma_sound_init_from_file(&engine, file_path.c_str(), MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH ,NULL,NULL,&current_song);
+    ma_sound_init_from_file(&engine, (*song_title_itr).c_str(), MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH ,NULL,NULL,&current_song);
     ma_sound_start(&current_song);
 
     //Make sure the song we started playing is selected in the player
-    visually_select_by_name(file_path);
-    
+    visually_select(song_title_itr);
 }
 
-void music_player::player::visually_select_by_name(std::string_view to_select){
-    auto itr {std::find(public_song_entries.begin(),public_song_entries.end(),to_select)};
-    if(itr != public_song_entries.end()){
-        selected = (itr - public_song_entries.begin());
-    }
-}
 
 void music_player::player::restart(logger& logger){
     ma_sound_stop(&current_song); //this may be redundant
@@ -66,35 +59,36 @@ void music_player::player::seek_percentage(float interval, bool forward) {
 
 }
 
-std::string music_player::player::get_and_select_random_song(){
+std::vector<std::string>::iterator music_player::player::get_and_select_random_song(){
     static std::random_device dev;
     static std::mt19937 rng(dev());
     std::uniform_int_distribution<std::mt19937::result_type> dist(0,public_song_entries.size()); 
 
     auto num {dist(rng)};
     selected = num;
-    return public_song_entries[num];
+    return public_song_entries.begin() + num;
 
 }
 
 
 void music_player::player::play_next(logger& logger, bool forward){
+
     auto itr {std::find(public_song_entries.begin(),public_song_entries.end(),current_song_title)};
     bool entry_found {itr != public_song_entries.end()};
 
-    if(forward) {
+    if(forward){
         if(entry_found && (itr - public_song_entries.begin()) + 1 < public_song_entries.size()){
-            start_song(public_song_entries[(itr - public_song_entries.begin()) + 1],logger);
+            start_song(itr + 1,logger);
         }else{
             //loop back around
-            start_song(public_song_entries[0],logger);
+            start_song(public_song_entries.begin(),logger);
         }
     }else{
         if(entry_found && ( (itr - public_song_entries.begin()) - 1 ) >= 0){
-            start_song(public_song_entries[ (itr - public_song_entries.begin()) - 1],logger);
+            start_song(itr - 1,logger);
         }else{
             //loop back around
-            start_song(public_song_entries[public_song_entries.size()-1],logger);
+            start_song(public_song_entries.end()-1,logger);
         }
 
     }
@@ -147,7 +141,7 @@ void music_player::player::clear_search(){
 
 
     //Make sure that when the search is cleared, we select the at-the-time selected song in the new context.
-    visually_select_by_name(saved_search_selection);
+    visually_select(std::find(public_song_entries.begin(),public_song_entries.end(),saved_search_selection));
 
 }
 
