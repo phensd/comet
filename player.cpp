@@ -19,6 +19,17 @@ void music_player::player::start_song(std::string file_path, logger& logger){
 
     ma_sound_init_from_file(&engine, file_path.c_str(), MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH ,NULL,NULL,&current_song);
     ma_sound_start(&current_song);
+
+    //Make sure the song we started playing is selected in the player
+    visually_select_by_name(file_path);
+    
+}
+
+void music_player::player::visually_select_by_name(std::string_view to_select){
+    auto itr {std::find(public_song_entries.begin(),public_song_entries.end(),to_select)};
+    if(itr != public_song_entries.end()){
+        selected = (itr - public_song_entries.begin());
+    }
 }
 
 void music_player::player::restart(logger& logger){
@@ -134,12 +145,10 @@ void music_player::player::clear_search(){
     current_search = "";
     public_song_entries = get_filtered_entries();
 
-    //After we clear the search, find the song that was previously selected in the new refreshed list and
-    //set the current selection to it
-    auto itr {std::find(public_song_entries.begin(),public_song_entries.end(),saved_search_selection)};
-    if(itr != public_song_entries.end()){
-        selected = (itr - public_song_entries.begin());
-    }
+
+    //Make sure that when the search is cleared, we select the at-the-time selected song in the new context.
+    visually_select_by_name(saved_search_selection);
+
 }
 
 bool music_player::player::match_search_string (std::string input, std::string to_match){

@@ -28,6 +28,8 @@ namespace  music_player {
 
             std::string get_and_select_random_song();
 
+            void visually_select_by_name(std::string_view to_select);
+
 
             ma_engine engine;
             ma_sound current_song;
