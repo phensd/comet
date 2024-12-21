@@ -6,8 +6,6 @@
 #include <random>
 #include "include/filesystem.h"
 
-
-
 void music_player::player::start_song(std::vector<std::string>::iterator song_title_itr, logger& logger){
      //if a song is playing unload it
     if(!current_song_title.empty()){
@@ -198,18 +196,24 @@ std::vector<std::string> music_player::player::get_default_path_entries(){
 }
 
 std::string music_player::player::get_state_message(){
+
     //if nothing is selected or playing say nothing
     if(current_song_title.empty() && !song_playing()){
         return "";
     }
 
+    std::string to_return;
+
     //on the flip side, if something is selected to be played, but nothing is playing through mAudio, say the player is paused
     if(!current_song_title.empty() && !song_playing()){
-        return "Paused";
+        to_return =  "Paused - ";
+    }else {
+        //otherwise, say the player is playing a song
+        to_return = "Playing - ";
     }
 
-    //otherwise, say the player is playing a song
-    std::string to_return {"Playing"};
+    //add the time 
+    to_return += util::create_timestamp_string(get_current_timestamp_seconds(), get_current_song_length_seconds());
 
     //add the current state (looping, shuffling) to the text
     to_return += " " + map_player_state_to_string[current_response_state];
