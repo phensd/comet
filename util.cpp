@@ -1,4 +1,27 @@
 #include "include/util.h"
+#include <format>
+#include <sstream>
+#include <iomanip>
+
+std::string music_player::util::create_timestamp_string(double current_timestamp_seconds, float current_song_length_seconds){
+
+    std::string to_return;
+
+    //using string stream for std::fill and std::width
+    std::stringstream seconds_lhs{};
+    seconds_lhs << std::setfill('0') << std::setw(2) << (int) current_timestamp_seconds % 60;
+    to_return += std::format("{}:{}",std::to_string((current_timestamp_seconds / 60))[0],seconds_lhs.str());
+
+    to_return += "/";
+    
+    std::stringstream seconds_rhs{};
+    seconds_rhs << std::setfill('0') << std::setw(2) << (int) current_song_length_seconds % 60;
+    to_return += std::format("{}:{}",std::to_string((current_song_length_seconds / 60))[0],seconds_rhs.str());
+
+
+    return to_return;
+}
+
 
 std::string music_player::util::lower (std::string input) {
     for(int i {0}; i < input.size(); ++i) {
