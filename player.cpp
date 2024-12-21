@@ -76,18 +76,21 @@ void music_player::player::play_next(logger& logger, bool forward){
     auto itr {std::find(public_song_entries.begin(),public_song_entries.end(),current_song_title)};
     bool entry_found {itr != public_song_entries.end()};
 
+    //if going forward..
     if(forward){
+        //check if going one song forward would bring us to the end, if not then start the next song
         if(entry_found && (itr - public_song_entries.begin()) + 1 < public_song_entries.size()){
             start_song(itr + 1,logger);
         }else{
-            //loop back around
+            //if it does bring us to the end, loop back around to the beginning
             start_song(public_song_entries.begin(),logger);
         }
     }else{
+        //ditto but backwards, if going backwards would not bring us to the beginning of the list, then go backwards 
         if(entry_found && ( (itr - public_song_entries.begin()) - 1 ) >= 0){
             start_song(itr - 1,logger);
         }else{
-            //loop back around
+            //if it does, then loop back around to the end
             start_song(public_song_entries.end()-1,logger);
         }
 
