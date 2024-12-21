@@ -12,6 +12,7 @@
 #include "include/logger.h"
 #include <cctype>
 #include "include/filesystem.h"
+#include "include/input.h"
 
 using namespace ftxui;
 
@@ -107,158 +108,7 @@ int main() {
     });
 
 
-    //main key inputs 
-    main_window |= CatchEvent([&] (Event event){
-
-
-        //Focusing search bar with "?"
-        if(event == Event::Character('?')){
-            search_bar->TakeFocus();
-            return true;
-        }
-
-
-        //if pressing escape while searching, focus the song selector
-        if(event == Event::Escape){
-            if(search_bar->Focused()){
-                song_selector->TakeFocus();
-            }
-            return true;
-        }
-
-
-
-        //only do these for the song selector page
-        //and dont take them if search bar is being used
-        if(tab_selected != 0 || search_bar->Active()) return false;
-
-
-        //hold ctrl while using uparrows for faster navigation
-        //note: it does not go out of index for some reason
-        //so this is safe without any checks
-        if(event == Event::ArrowUpCtrl){
-            engine.selected -=2;
-            return true;
-        }
-
-        if(event == Event::ArrowDownCtrl){
-            engine.selected +=2;
-            return true;
-        }
-
-        //even if the search bar isn't focused, clear it when pressing delete
-        if(event == Event::Delete){
-            engine.clear_search();
-            return true;
-        }
-
-
-        //starting song
-        if(event == Event::Return){
-            //if there are no songs to play do nothing!!!!!
-            if(engine.public_song_entries.size() < 1 ) return true;
-            engine.start_song( engine.public_song_entries.begin() + engine.selected,logger);
-            return true;
-        }
-
-        //restarting song
-        if(event == Event::r){
-            if(!engine.current_song_title.empty()) engine.restart(logger);
-            return true;
-        }
-
-        //next song
-        if(event == Event::Character('.')){
-            engine.play_next(logger,true);
-            return true;
-        }
-        //previous song
-        if(event == Event::Character(',')){
-            engine.play_next(logger,false);
-            return true;
-        }
-
-        //toggling states
-        //loop
-        if(event == Event::l){
-            engine.toggle_player_state(music_player::player_response_state::LOOP);
-            return true;
-        }
-        //shuffle
-        if(event == Event::s){
-            engine.toggle_player_state(music_player::player_response_state::SHUFFLE);
-            return true;
-        }
-
-        //pausing and unpausing (this is spacebar)
-        if(event == Event::Character(' ')){
-            //no song playing, do nothing
-            if(engine.current_song_title.empty()) return true;
-            //trying to unpause when a song is over will just restart it
-            if(engine.song_over()) { engine.restart(logger); return true; };
-
-
-            if(engine.song_playing()){
-                engine.pause_or_stop_song();
-            }else{
-                engine.start_loaded_song();
-            }
-            return true;
-        }
-
-        //Refresh songs list
-        if(event == Event::F4){
-            engine.current_search = "";
-            engine.refresh_entries(logger);
-            logger.log("Refreshed songs list");
-        }
-
-        //dont let user seek if there is no data to seek
-        if(!engine.current_song_title.empty()){
-            //seek right
-            if(event == Event::ArrowRight){
-                engine.seek_percentage(0.025f,true);
-                return true;
-            }
-
-            if(event == Event::ArrowRightCtrl){
-                engine.seek_percentage(0.075f,true);
-                return true;
-            }
-
-            //seek left
-            if(event == Event::ArrowLeft){
-                engine.seek_percentage(0.025f,false);
-                return true;
-            }
-
-            if(event == Event::ArrowLeftCtrl){
-                engine.seek_percentage(0.075f,false);
-                return true;
-            }
-        }
-
-    
-        //volume controls
-        if(event == Event::Character("=")){
-            engine.increase_volume(0.07);
-            return true;
-        }
-        if(event == Event::Character("-")){
-            engine.increase_volume(-0.07);
-            return true;
-        }
-        if(event == Event::Character("+")){
-            engine.increase_volume(0.15);
-            return true;
-        }
-        if(event == Event::Character("_")){
-            engine.increase_volume(-0.15);
-            return true;
-        }
-
-        return false;
-    });
+    music_player::register_main_inputs(tab_selected, song_selector, search_bar, main_window, engine, logger);
 
     //the main renderer/order of components
     auto component = Renderer(main_window, [&] {
@@ -306,10 +156,6 @@ int main() {
         //various things that need to refresh frequently 
         screen.Post( [&] { engine.active_refresh(engine.current_song_title, logger, tab_values);});
         screen.Post(Event::Custom);
-
-
-
-
     }
   });
 
