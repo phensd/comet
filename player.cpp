@@ -106,7 +106,7 @@ void music_player::player::on_song_end(logger& logger){
 //various things to update in real time
 void music_player::player::active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values){
     if(!current_song_display.empty()) {
-        if(ma_sound_at_end(&current_song)){
+        if(song_over()){
             on_song_end(logger);
         }
         //update volume of song
@@ -143,11 +143,16 @@ void music_player::player::clear_search(){
     public_song_entries = get_filtered_entries();
 
 
-    //Make sure that when the search is cleared, we select the at-the-time selected song in the new context.
+    //Make sure that when the search is cleared, we select the at-the-time selected song in the new context,
+    //by finding the name of the song that was selected when the search was up, in the new list of songs.
     visually_select(std::find(public_song_entries.begin(),public_song_entries.end(),saved_search_selection));
 
 }
 
+//takes in users search, splits it by spaces if they exist, then tries to match each part
+//of the split with the song title
+//if there are no spaces, it just matches the entire string with the title
+//used to filter songs with the search bar
 bool music_player::player::match_search_string (std::string input, std::string to_match){
     //if there is spaces in the search, match each segment of the search (split by spaces) individually
     if(input.find(" ") != std::string::npos){
@@ -197,12 +202,12 @@ std::vector<std::string> music_player::player::get_default_path_entries(){
 
 std::string music_player::player::get_state_message(){
     //if nothing is selected or playing say nothing
-    if(current_song_title.empty() && !ma_sound_is_playing(&current_song)){
+    if(current_song_title.empty() && !song_playing()){
         return "";
     }
 
     //on the flip side, if something is selected to be played, but nothing is playing through mAudio, say the player is paused
-    if(!current_song_title.empty() && !ma_sound_is_playing(&current_song)){
+    if(!current_song_title.empty() && !song_playing()){
         return "Paused";
     }
 
