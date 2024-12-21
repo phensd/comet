@@ -2,73 +2,11 @@
 #include "../vendor/miniaudio.h"
 #include <vector>
 #include "logger.h"
+#include "player_response_state.h"
 #include <map>
 
 namespace  music_player {
-
-    struct player {
-
-        enum class player_response_state {
-            LOOP,
-            SHUFFLE,
-            PLAY_NEXT
-        };
-
-        player_response_state current_response_state {player::player_response_state::PLAY_NEXT};
-
-
-        ma_engine engine;
-        ma_sound current_song;
-
-
-        std::string current_song_title{};
-        std::string current_search {};
-        int selected {};
-
-
-        std::vector<std::string> user_paths_entries {};
-
-        std::vector<std::string> public_song_entries{};
-       
-
-
-        void start_song(std::string file_path,logger& logger);
-
-        void increase_volume(float value);
-
-        float get_current_song_length_seconds() {float length; ma_sound_get_length_in_seconds(&current_song, &length); return length;}
-        double get_current_timestamp_seconds() { return ma_sound_get_time_in_milliseconds(&current_song)/1000.0f; };
-
-
-        void restart(logger& logger);
-
-        void seek_percentage(float interval, bool forward);
-
-
-        void active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values);
-        void refresh_entries(logger& logger);
-
-        void on_song_end(logger& logger);
-        std::string get_and_select_random_song();
-
-
-        std::string get_state_message();
-
-
-
-        //volume gauge needs this
-        float get_max_volume(){return max_volume;}
-        float get_volume() {return volume;}
-
-        void apply_search_filter();
-
-        void clear_search();
-
-        void toggle_player_state(player_response_state desired_state);
-
-        player(logger& logger);
-        ~player();
-
+    class player {
         private:
             float volume {0.5f};
 
@@ -88,7 +26,14 @@ namespace  music_player {
 
             std::vector<std::string> get_default_path_entries();
 
+            std::string get_and_select_random_song();
 
+
+            ma_engine engine;
+            ma_sound current_song;
+
+
+            player_response_state current_response_state {player_response_state::PLAY_NEXT};
 
             std::map<player_response_state,std::string> map_player_state_to_string {
                 {player_response_state::LOOP, "[Loop]"},  
@@ -96,11 +41,65 @@ namespace  music_player {
                 {player_response_state::PLAY_NEXT, ""},  
             };
 
+       
+        public:
+            std::string current_song_title{};
+            std::string current_search {};
+            int selected {};
 
 
+            std::vector<std::string> user_paths_entries {};
+
+            std::vector<std::string> public_song_entries{};
 
 
-    };
+            void start_song(std::string file_path,logger& logger);
+
+            void increase_volume(float value);
+
+            float get_current_song_length_seconds() {float length; ma_sound_get_length_in_seconds(&current_song, &length); return length;}
+            double get_current_timestamp_seconds() { return ma_sound_get_time_in_milliseconds(&current_song)/1000.0f; };
+
+
+            void restart(logger& logger);
+
+            void seek_percentage(float interval, bool forward);
+
+
+            void active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values);
+            void refresh_entries(logger& logger);
+
+            void on_song_end(logger& logger);
+
+
+            std::string get_state_message();
+
+            //volume gauge needs this
+            float get_max_volume(){return max_volume;}
+            float get_volume() {return volume;}
+
+            void apply_search_filter();
+
+            void clear_search();
+
+            void toggle_player_state(player_response_state desired_state);
+
+
+            //one liners will be defined here instead of in cpp file
+            bool song_over() {return ma_sound_at_end(&current_song);}
+            void pause_or_stop_song() {{ma_sound_stop(&current_song);}}
+            void start_loaded_song() {ma_sound_start(&current_song);}
+            bool song_playing() {{return ma_sound_is_playing(&current_song);}}
+
+            player(logger& logger);
+            ~player();
+
+            //these should not exist since this class is basically a singleton
+            player(const player& loan) = delete;
+            player& operator=(const player& other) = delete;
+
+
 
         
+    };
 }

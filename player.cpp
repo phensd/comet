@@ -9,7 +9,6 @@
 
 
 void music_player::player::start_song(std::string file_path, logger& logger){
-
      //if a song is playing unload it
     if(!current_song_title.empty()){
         ma_sound_uninit(&current_song);
@@ -56,13 +55,9 @@ void music_player::player::seek_percentage(float interval, bool forward) {
 }
 
 std::string music_player::player::get_and_select_random_song(){
-    
-
-
     static std::random_device dev;
     static std::mt19937 rng(dev());
     std::uniform_int_distribution<std::mt19937::result_type> dist(0,public_song_entries.size()); 
-
 
     auto num {dist(rng)};
     selected = num;
@@ -72,9 +67,9 @@ std::string music_player::player::get_and_select_random_song(){
 
 
 void music_player::player::on_song_end(logger& logger){
-    if(current_response_state == player::player_response_state::LOOP) restart(logger);
-    if(current_response_state == player::player_response_state::SHUFFLE) start_song(get_and_select_random_song(),logger);
-    if(current_response_state == player::player_response_state::PLAY_NEXT){
+    if(current_response_state == player_response_state::LOOP) restart(logger);
+    if(current_response_state == player_response_state::SHUFFLE) start_song(get_and_select_random_song(),logger);
+    if(current_response_state == player_response_state::PLAY_NEXT){
         if(selected + 1 >= public_song_entries.size()-1) selected = -1;
         start_song(public_song_entries[++selected],logger);
     }
@@ -84,8 +79,6 @@ void music_player::player::on_song_end(logger& logger){
 void music_player::player::active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values){
     
     if(!current_song_display.empty()) {
-        //loop songs by default for now
-        //todo: make this account for the player state (loop,shuffle,etc)
         if(ma_sound_at_end(&current_song)){
             on_song_end(logger);
         }
@@ -114,7 +107,6 @@ void music_player::player::apply_search_filter(){
 }
 
 void music_player::player::clear_search(){
-
     //save what song the user had as a selection before we clear the search
     //if the current search resulted in an empty list, set the saved selection to the first element of the all-songs list
     std::string saved_search_selection {public_song_entries.size() > 0 ? public_song_entries[selected] : all_song_entries[0]};
@@ -149,15 +141,13 @@ bool music_player::player::match_search_string (std::string input, std::string t
 
 
 std::vector<std::string>& music_player::player::get_filtered_entries(){
+    //if there is a search, filter the results according to that search
     if(current_search.length() > 0){
-
         filtered_entries.clear();
-
         std::copy_if(all_song_entries.begin(),all_song_entries.end(),std::back_inserter(filtered_entries),
-        [this] (std::string& entry){
+        [this](std::string& entry){
             return match_search_string(current_search,entry);
         });
-
         return filtered_entries;
     }
     //if no search filter is in place, return all the songs
@@ -200,9 +190,9 @@ std::string music_player::player::get_state_message(){
     return to_return;
 }
 
-void music_player::player::toggle_player_state(music_player::player::player_response_state desired_state){
+void music_player::player::toggle_player_state(player_response_state desired_state){
     if(current_response_state == desired_state){
-        current_response_state = music_player::player::player_response_state::PLAY_NEXT;
+        current_response_state = player_response_state::PLAY_NEXT; //toggle back to default state
     }else{
         current_response_state = desired_state;
     }

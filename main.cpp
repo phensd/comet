@@ -170,12 +170,12 @@ int main() {
         //toggling states
         //loop
         if(event == Event::l){
-            engine.toggle_player_state(music_player::player::player_response_state::LOOP);
+            engine.toggle_player_state(music_player::player_response_state::LOOP);
             return true;
         }
         //shuffle
         if(event == Event::s){
-            engine.toggle_player_state(music_player::player::player_response_state::SHUFFLE);
+            engine.toggle_player_state(music_player::player_response_state::SHUFFLE);
             return true;
         }
 
@@ -184,13 +184,13 @@ int main() {
             //no song playing, do nothing
             if(engine.current_song_title.empty()) return true;
             //trying to unpause when a song is over will just restart it
-            if(ma_sound_at_end(&engine.current_song)) { engine.restart(logger); return true; };
+            if(engine.song_over()) { engine.restart(logger); return true; };
 
 
-            if(ma_sound_is_playing(&engine.current_song)){
-                ma_sound_stop(&engine.current_song);
+            if(engine.song_playing()){
+                engine.pause_or_stop_song();
             }else{
-                ma_sound_start(&engine.current_song);
+                engine.start_loaded_song();
             }
             return true;
         }
