@@ -119,9 +119,6 @@ void music_player::player::active_refresh(std::string_view current_song_display,
 
 }
 
-music_player::player::~player(){
-    ma_engine_uninit(&engine);
-}
 
 void music_player::player::refresh_entries(logger& logger){
     all_song_entries = filesystem::find_song_entries(user_paths_entries,logger);

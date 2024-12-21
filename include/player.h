@@ -98,11 +98,12 @@ namespace  music_player {
             bool song_playing() {{return ma_sound_is_playing(&current_song);}}
 
             player(logger& logger);
-            ~player();
 
             //these should not exist since this class is basically a singleton
             player(const player& loan) = delete;
             player& operator=(const player& other) = delete;
+            ~player(){ ma_engine_uninit(&engine);}
+
 
 
 
