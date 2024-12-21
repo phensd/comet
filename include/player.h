@@ -27,6 +27,7 @@ namespace  music_player {
             std::vector<std::string> get_default_path_entries();
 
             std::string get_and_select_random_song();
+            void play_next(logger& logger, bool forward=true);
 
 
             ma_engine engine;

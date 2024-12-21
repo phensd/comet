@@ -67,17 +67,20 @@ std::string music_player::player::get_and_select_random_song(){
 }
 
 
+void music_player::player::play_next(logger& logger, bool forward){
+    auto itr {std::find(public_song_entries.begin(),public_song_entries.end(),current_song_title)};
+    if(itr != public_song_entries.end() && (itr - public_song_entries.begin() + 1) < public_song_entries.size()){
+        start_song(public_song_entries[(itr - public_song_entries.begin()) + 1],logger);
+    }else{
+        start_song(public_song_entries[0],logger);
+    }
+
+}
+
 void music_player::player::on_song_end(logger& logger){
     if(current_response_state == player_response_state::LOOP) restart(logger);
     if(current_response_state == player_response_state::SHUFFLE) start_song(get_and_select_random_song(),logger);
-    if(current_response_state == player_response_state::PLAY_NEXT){
-        auto itr {std::find(public_song_entries.begin(),public_song_entries.end(),current_song_title)};
-        if(itr != public_song_entries.end() && (itr - public_song_entries.begin() + 1) < public_song_entries.size()){
-            start_song(public_song_entries[(itr - public_song_entries.begin()) + 1],logger);
-        }else{
-            start_song(public_song_entries[0],logger);
-        }
-    }
+    if(current_response_state == player_response_state::PLAY_NEXT) play_next(logger);
 }
 
 //various things to update in real time
