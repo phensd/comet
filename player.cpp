@@ -11,12 +11,13 @@
 void music_player::player::start_song(std::string file_path, logger& logger){
      //if a song is playing unload it
     if(!current_song_title.empty()){
+        ma_sound_stop(&current_song);
         ma_sound_uninit(&current_song);
     } 
 
     current_song_title = file_path;
 
-    ma_sound_init_from_file(&engine, file_path.c_str(), MA_SOUND_FLAG_STREAM,NULL,NULL,&current_song);
+    ma_sound_init_from_file(&engine, file_path.c_str(), MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH ,NULL,NULL,&current_song);
     ma_sound_start(&current_song);
 }
 
