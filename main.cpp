@@ -167,6 +167,17 @@ int main() {
             return true;
         }
 
+        //next song
+        if(event == Event::Character('.')){
+            engine.play_next(logger,true);
+            return true;
+        }
+        //previous song
+        if(event == Event::Character(',')){
+            engine.play_next(logger,false);
+            return true;
+        }
+
         //toggling states
         //loop
         if(event == Event::l){

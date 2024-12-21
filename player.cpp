@@ -69,12 +69,24 @@ std::string music_player::player::get_and_select_random_song(){
 
 void music_player::player::play_next(logger& logger, bool forward){
     auto itr {std::find(public_song_entries.begin(),public_song_entries.end(),current_song_title)};
-    if(itr != public_song_entries.end() && (itr - public_song_entries.begin() + 1) < public_song_entries.size()){
-        start_song(public_song_entries[(itr - public_song_entries.begin()) + 1],logger);
-    }else{
-        start_song(public_song_entries[0],logger);
-    }
+    bool entry_found {itr != public_song_entries.end()};
 
+    if(forward) {
+        if(entry_found && (itr - public_song_entries.begin()) + 1 < public_song_entries.size()){
+            start_song(public_song_entries[(itr - public_song_entries.begin()) + 1],logger);
+        }else{
+            //loop back around
+            start_song(public_song_entries[0],logger);
+        }
+    }else{
+        if(entry_found && ( (itr - public_song_entries.begin()) - 1 ) >= 0){
+            start_song(public_song_entries[ (itr - public_song_entries.begin()) - 1],logger);
+        }else{
+            //loop back around
+            start_song(public_song_entries[public_song_entries.size()-1],logger);
+        }
+
+    }
 }
 
 void music_player::player::on_song_end(logger& logger){
@@ -85,7 +97,6 @@ void music_player::player::on_song_end(logger& logger){
 
 //various things to update in real time
 void music_player::player::active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values){
-    
     if(!current_song_display.empty()) {
         if(ma_sound_at_end(&current_song)){
             on_song_end(logger);
