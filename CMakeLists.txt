@@ -31,6 +31,10 @@ target_link_libraries(comet
 )
 
 
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wfatal-errors")
+set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -s")
+
 
 set_property(TARGET comet PROPERTY CXX_STANDARD 20)
 install(TARGETS comet RUNTIME DESTINATION bin)
