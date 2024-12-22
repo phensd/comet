@@ -59,9 +59,6 @@ int main() {
         input_box |= CatchEvent([&](Event event) {
             if(event == Event::Return){
                 engine.refresh_entries(logger);
-                //if there is a search currently 
-                //then the user might not see the affects of the list refreshing
-                engine.clear_search();
                 return true;
             }
             return false;

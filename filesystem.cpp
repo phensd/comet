@@ -124,5 +124,6 @@ std::vector<std::string> music_player::filesystem::find_song_entries(std::vector
     }
 
     logger.log("No. entries found total " +  std::to_string(to_return.size()),true);
+
     return {to_return.begin(),to_return.end()};
 }
