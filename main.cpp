@@ -31,7 +31,7 @@ int main() {
     std::vector<std::string> tab_values{
       "Songs", //this is adjusted in real time in player.cpp/active_refresh to add a (X) where X is the number of songs
       "Options",
-    }; int tab_selected {1};
+    }; int tab_selected {0};
     auto tab_menu = Toggle(&tab_values, &tab_selected);
 
 
@@ -137,7 +137,7 @@ int main() {
                     hbox(
                         vbox(
                         
-                            //text(engine.get_state_message()),
+                            text(engine.get_state_message()),
                             text(engine.current_song_title),
                             border(gauge( (!engine.current_song_title.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
 

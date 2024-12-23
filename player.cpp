@@ -113,7 +113,6 @@ void comet::player::active_refresh(std::string_view current_song_display,logger&
 
     //display number of songs found in the tab
     tab_values[0] = (std::string) "Songs" + "(" + std::to_string(public_song_entries.size()) + ")";
-
 }
 
 
@@ -183,16 +182,16 @@ std::vector<std::string>& comet::player::get_filtered_entries(){
 
 std::string comet::player::get_state_message(){
 
-    //if nothing is selected or playing say nothing
-    if(current_song_title.empty() && !song_playing()){
+    //if nothing is selected say nothing
+    if(current_song_title.empty()){
         return "";
     }
 
-    std::string to_return;
+    std::string to_return{};
 
     //on the flip side, if something is selected to be played, but nothing is playing through mAudio, say the player is paused
     if(!current_song_title.empty() && !song_playing()){
-        to_return =  "Paused - ";
+        to_return = "Paused - ";
     }else {
         //otherwise, say the player is playing a song
         to_return = "Playing - ";
@@ -203,7 +202,7 @@ std::string comet::player::get_state_message(){
 
     //add the current state (looping, shuffling) to the text
     to_return += " " + map_player_state_to_string[current_response_state];
-
+    
     return to_return;
 }
 
