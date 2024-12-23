@@ -29,7 +29,7 @@ int main() {
 
     std::vector<std::string> tab_values{
       "Songs", //this is adjusted in real time in player.cpp/active_refresh to add a (X) where X is the number of songs
-      "Paths",
+      "Options",
     };
 
     int tab_selected {0};
@@ -38,6 +38,10 @@ int main() {
     //the main song selector
     auto song_selector {Menu(&engine.public_song_entries,&engine.selected) | frame};
 
+    std::vector<std::string> options_values{
+        "Paths",
+        "Settings",
+    };
 
 
     auto create_input_box = [&engine] (std::string& content,std::string text) {
@@ -109,35 +113,57 @@ int main() {
 
     //the main renderer/order of components
     auto component = Renderer(main_window, [&] {
-        return vbox({
-            vbox({
-                hbox
-                (
-                    tab_menu->Render(),
-                    separator(),
-                    search_bar->Render()
+        if(tab_selected == 0){
+            return vbox({
+                vbox({
+                    hbox
+                    (
+                        tab_menu->Render(),
+                        separator(),
+                        search_bar->Render()
 
-                ),
-                
-                hbox(
-                    border(tabs->Render() | flex),
-                    border(gaugeUp(engine.get_volume()) | color(Color(182,193,253))) | size(HEIGHT,EQUAL,12)
+                    ),
                     
-                ) | flex,
-                
-                hbox(
-                    vbox(
-                    
-                        text(engine.get_state_message()),
-                        text(engine.current_song_title),
-                        border(gauge( (!engine.current_song_title.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
-
+                    hbox(
+                        border(tabs->Render() | flex),
+                        border(gaugeUp(engine.get_volume()) | color(Color(182,193,253))) | size(HEIGHT,EQUAL,12)
+                        
                     ) | flex,
-                    //make progress bar align (sorta) with end of the panels
-                    separatorEmpty() | size(WIDTH,EQUAL,3)
-                )
-            })
-        });
+                    
+                    hbox(
+                        vbox(
+                        
+                            text(engine.get_state_message()),
+                            text(engine.current_song_title),
+                            border(gauge( (!engine.current_song_title.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
+
+                        ) | flex,
+                        //make progress bar align (sorta) with end of the panels
+                        separatorEmpty() | size(WIDTH,EQUAL,3)
+                    )
+                })
+            });
+        }
+
+        if(tab_selected == 1){
+            return vbox({
+                vbox({
+                    hbox
+                    (
+                        tab_menu->Render(),
+                        separator(),
+                        search_bar->Render()
+
+                    ),
+                    
+                    hbox(
+                        border(tabs->Render() | flex)
+                        
+                    ) | flex,
+                    
+                })
+            });
+        }
     });
 
 
