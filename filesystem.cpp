@@ -22,6 +22,7 @@ std::string comet::filesystem_manager::get_data_directory(){
 
 }
 
+
 bool comet::filesystem_manager::saved_json_exists(std::string json_path){
     return std::filesystem::exists(get_data_directory() + json_path);
 }
@@ -126,4 +127,30 @@ std::vector<std::string> comet::filesystem_manager::find_song_entries(comet::log
     logger.log("No. entries found total " +  std::to_string(to_return.size()),true);
 
     return {to_return.begin(),to_return.end()};
+}
+
+std::vector<std::string> comet::filesystem_manager::get_default_path_entries(){
+
+    std::vector<std::string> defaults{};
+
+    //push a default /home/user/music path to the list
+    defaults.emplace_back((std::string) getenv("HOME") + "/Music");
+
+    //the default empty path slots
+    for(int i{0}; i < 9; ++i){
+        defaults.emplace_back("");
+    }
+
+    return defaults;
+}
+
+
+comet::filesystem_manager::filesystem_manager(logger& logger){
+    if(saved_json_exists("comet.json")){
+        //if the json fails to parse and returns nothing then use the default entries
+        user_paths_entries = load_user_path_entries("comet.json",logger).value_or(get_default_path_entries());
+    }else {
+        //if the json file doesnt exist then use the default entries too
+        user_paths_entries = get_default_path_entries();
+    }
 }

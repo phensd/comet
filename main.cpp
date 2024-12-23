@@ -18,10 +18,10 @@ using namespace ftxui;
 
 int main() {
 
-    
-    comet::filesystem_manager fsysmanager {};
     comet::logger logger{};
+    comet::filesystem_manager fsysmanager {logger};
     comet::player engine {logger,fsysmanager};
+
     
 
     auto screen = ScreenInteractive::Fullscreen();
@@ -31,13 +31,12 @@ int main() {
     std::vector<std::string> tab_values{
       "Songs", //this is adjusted in real time in player.cpp/active_refresh to add a (X) where X is the number of songs
       "Options",
-    }; int tab_selected {0};
+    }; int tab_selected {1};
     auto tab_menu = Toggle(&tab_values, &tab_selected);
 
 
     //the main song selector
     auto song_selector {Menu(&engine.public_song_entries,&engine.selected) | frame};
-
 
 
     std::vector<std::string> song_title_display_options{
@@ -62,7 +61,7 @@ int main() {
 
     auto user_paths = Container::Vertical({});
     for(int i {0}; i < 10; ++i){
-        auto input_box {create_input_box(engine.user_paths_entries[i],"Enter a path...")};
+        auto input_box {create_input_box(fsysmanager.user_paths_entries[i],"Enter a path...")};
 
         input_box |= CatchEvent([&](Event event) {
             if(event == Event::Return){
@@ -138,7 +137,7 @@ int main() {
                     hbox(
                         vbox(
                         
-                            text(engine.get_state_message()),
+                            //text(engine.get_state_message()),
                             text(engine.current_song_title),
                             border(gauge( (!engine.current_song_title.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
 

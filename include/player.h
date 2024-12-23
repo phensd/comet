@@ -28,7 +28,6 @@ namespace  comet {
             std::vector<std::string>& get_filtered_entries();
             bool match_search_string (std::string input, std::string to_match);
 
-            std::vector<std::string> get_default_path_entries();
 
             std::vector<std::string>::iterator get_and_select_random_song();
 
@@ -57,8 +56,6 @@ namespace  comet {
             int selected {};
             void play_next(logger& logger, bool forward=true);
 
-
-            std::vector<std::string> user_paths_entries {};
 
             std::vector<std::string> public_song_entries{};
 

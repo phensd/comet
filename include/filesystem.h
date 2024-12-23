@@ -7,7 +7,6 @@
 namespace comet{
     class filesystem_manager{
 
-        std::vector<std::string> user_paths_entries{};
 
 
 
@@ -22,12 +21,14 @@ namespace comet{
 
 
         public:
+            std::vector<std::string> user_paths_entries{};
             std::string get_data_directory();
             bool saved_json_exists(std::string json_path);
             std::optional<std::vector<std::string>> load_user_path_entries(std::string input_file_path,logger& logger);
             std::vector<std::string> find_song_entries (comet::logger& logger);
+            std::vector<std::string> get_default_path_entries();
 
-
+            filesystem_manager(logger& logger);
             ~filesystem_manager(){write_user_path_entries("comet.json", user_paths_entries);}
         
 

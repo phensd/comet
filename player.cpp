@@ -179,20 +179,7 @@ std::vector<std::string>& comet::player::get_filtered_entries(){
 }
 
 
-std::vector<std::string> comet::player::get_default_path_entries(){
 
-    std::vector<std::string> defaults{};
-
-    //push a default /home/user/music path to the list
-    defaults.emplace_back((std::string) getenv("HOME") + "/Music");
-
-    //the default empty path slots
-    for(int i{0}; i < 9; ++i){
-        defaults.emplace_back("");
-    }
-
-    return defaults;
-}
 
 std::string comet::player::get_state_message(){
 
@@ -234,17 +221,6 @@ comet::player::player(logger& logger,filesystem_manager& fsysmanager) : fsysmana
 
     ma_result result;
     ma_engine_init(NULL,&engine);
-    
-
-    if(fsysmanager.saved_json_exists("comet.json")){
-        //if the json fails to parse and returns nothing then use the default entries
-        user_paths_entries = fsysmanager.load_user_path_entries("comet.json",logger).value_or(get_default_path_entries());
-    }else {
-        //if the json file doesnt exist then use the default entries too
-        user_paths_entries = get_default_path_entries();
-    }
-    
-
 
     //fill out the song entries
     all_song_entries = fsysmanager.find_song_entries(logger);
@@ -252,5 +228,6 @@ comet::player::player(logger& logger,filesystem_manager& fsysmanager) : fsysmana
 
     //set up the song entries
     public_song_entries = get_filtered_entries();
+
 
 }
