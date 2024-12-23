@@ -26,22 +26,26 @@ int main() {
 
     auto screen = ScreenInteractive::Fullscreen();
 
+    
 
     std::vector<std::string> tab_values{
       "Songs", //this is adjusted in real time in player.cpp/active_refresh to add a (X) where X is the number of songs
       "Options",
-    };
-
-    int tab_selected {0};
-    //menu that contains the tabs
+    }; int tab_selected {0};
     auto tab_menu = Toggle(&tab_values, &tab_selected);
+
+
     //the main song selector
     auto song_selector {Menu(&engine.public_song_entries,&engine.selected) | frame};
 
-    std::vector<std::string> options_values{
-        "Paths",
-        "Settings",
-    };
+
+
+    std::vector<std::string> song_title_display_options{
+        "File name",
+        "Tagged name",
+        "Full path",
+    };int song_title_display_option_selected {0};
+    auto song_title_display_toggle = Toggle(&song_title_display_options, &song_title_display_option_selected);
 
 
     auto create_input_box = [&engine] (std::string& content,std::string text) {
@@ -96,7 +100,7 @@ int main() {
     //container holding each tab
     auto tabs = Container::Tab({
         song_selector,
-        user_paths,
+        user_paths
         
     },&tab_selected);
 
@@ -105,7 +109,8 @@ int main() {
     auto main_window = Container::Horizontal({
         tabs,
         tab_menu,
-        search_bar
+        search_bar,
+        song_title_display_toggle
     });
 
 
@@ -156,14 +161,21 @@ int main() {
 
                     ),
                     
-                    hbox(
-                        border(tabs->Render() | flex)
+                    vbox(
+                        window(text("Paths for song searches"),user_paths->Render() | frame),
+                        hbox (
+                            text("* Display songs by their : "),
+                            song_title_display_toggle->Render()
+                        )
+
                         
                     ) | flex,
                     
                 })
             });
         }
+        //this is here for now to get the compiler to shut up about no return in non void function
+        return vbox({});
     });
 
 
