@@ -1,21 +1,39 @@
-
+#pragma once
 #include <optional>
 #include <vector>
 #include <string>
 #include "logger.h"
 
-namespace comet::filesystem{
+namespace comet{
+    class filesystem_manager{
 
-    std::vector<std::string> find_song_entries (std::vector<std::string> paths,comet::logger& logger);
-
-    bool validate_filetype(const std::string& path);
-
-    std::string get_home_dir();
-    std::optional<std::vector<std::string>> load_user_path_entries(std::string input_file_path,logger& logger);
-    std::string get_data_directory();
-    void write_user_path_entries(std::string output_file_path,std::vector<std::string>& entries_to_write);
+        std::vector<std::string> user_paths_entries{};
 
 
-    bool saved_json_exists(std::string json_path);
 
+        bool validate_filetype(const std::string& path);
+
+        std::string get_home_dir();
+        void write_user_path_entries(std::string output_file_path,std::vector<std::string>& entries_to_write);
+
+
+
+
+
+
+        public:
+            std::string get_data_directory();
+            bool saved_json_exists(std::string json_path);
+            std::optional<std::vector<std::string>> load_user_path_entries(std::string input_file_path,logger& logger);
+            std::vector<std::string> find_song_entries (comet::logger& logger);
+
+
+            ~filesystem_manager(){write_user_path_entries("comet.json", user_paths_entries);}
+        
+
+
+
+
+
+    };
 }

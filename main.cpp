@@ -19,9 +19,9 @@ using namespace ftxui;
 int main() {
 
     
-
+    comet::filesystem_manager fsysmanager {};
     comet::logger logger{};
-    comet::player engine {logger};
+    comet::player engine {logger,fsysmanager};
     
 
     auto screen = ScreenInteractive::Fullscreen();
@@ -198,7 +198,6 @@ int main() {
     refresh_ui_continue = false;
     refresh_ui.join();
 
-    comet::filesystem::write_user_path_entries("comet.json", engine.user_paths_entries);
 
     return 0;
 }

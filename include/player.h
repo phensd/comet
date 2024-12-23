@@ -1,6 +1,8 @@
 #pragma once
 #include "../vendor/miniaudio.h"
+#include <cstdio>
 #include <vector>
+#include "filesystem.h"
 #include "logger.h"
 #include "player_response_state.h"
 #include <map>
@@ -8,6 +10,8 @@
 namespace  comet {
     class player {
         private:
+            filesystem_manager& fsysmanager;
+
             float volume {0.5f};
 
             float max_volume {1.0f};
@@ -97,7 +101,7 @@ namespace  comet {
             void start_loaded_song() {ma_sound_start(&current_song);}
             bool song_playing() {{return ma_sound_is_playing(&current_song);}}
 
-            player(logger& logger);
+            player(logger& logger,filesystem_manager& fsysmanager);
 
             //these should not exist since this class is basically a singleton
             player(const player& loan) = delete;

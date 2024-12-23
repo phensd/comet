@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include "include/filesystem.h"
 
 bool comet::logger::log(const std::string& message,bool output_to_cerr){
 
@@ -27,5 +26,4 @@ bool comet::logger::log(const std::string& message,bool output_to_cerr){
 }
 
 comet::logger::logger(){
-    output_file_path = filesystem::get_data_directory() + "comet.log";
 }

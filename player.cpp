@@ -4,7 +4,6 @@
 #include <cctype>
 #include <iterator>
 #include <random>
-#include "include/filesystem.h"
 
 void comet::player::start_song(std::vector<std::string>::iterator song_title_itr, logger& logger){
      //if a song is playing unload it
@@ -119,7 +118,7 @@ void comet::player::active_refresh(std::string_view current_song_display,logger&
 
 
 void comet::player::refresh_entries(logger& logger){
-    all_song_entries = filesystem::find_song_entries(user_paths_entries,logger);
+    all_song_entries = fsysmanager.find_song_entries(logger);
     public_song_entries = get_filtered_entries();
 
 }
@@ -230,15 +229,16 @@ void comet::player::toggle_player_state(player_response_state desired_state){
 }
 
 
-comet::player::player(logger& logger){
+comet::player::player(logger& logger,filesystem_manager& fsysmanager) : fsysmanager(fsysmanager){
+
 
     ma_result result;
     ma_engine_init(NULL,&engine);
     
 
-    if(filesystem::saved_json_exists("comet.json")){
+    if(fsysmanager.saved_json_exists("comet.json")){
         //if the json fails to parse and returns nothing then use the default entries
-        user_paths_entries = filesystem::load_user_path_entries("comet.json",logger).value_or(get_default_path_entries());
+        user_paths_entries = fsysmanager.load_user_path_entries("comet.json",logger).value_or(get_default_path_entries());
     }else {
         //if the json file doesnt exist then use the default entries too
         user_paths_entries = get_default_path_entries();
@@ -247,7 +247,7 @@ comet::player::player(logger& logger){
 
 
     //fill out the song entries
-    all_song_entries = filesystem::find_song_entries(user_paths_entries,logger);
+    all_song_entries = fsysmanager.find_song_entries(logger);
 
 
     //set up the song entries
