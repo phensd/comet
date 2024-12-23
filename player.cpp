@@ -6,7 +6,7 @@
 #include <random>
 #include "include/filesystem.h"
 
-void music_player::player::start_song(std::vector<std::string>::iterator song_title_itr, logger& logger){
+void comet::player::start_song(std::vector<std::string>::iterator song_title_itr, logger& logger){
      //if a song is playing unload it
     if(!current_song_title.empty()){
         ma_sound_stop(&current_song);
@@ -23,7 +23,7 @@ void music_player::player::start_song(std::vector<std::string>::iterator song_ti
 }
 
 
-void music_player::player::restart(logger& logger){
+void comet::player::restart(logger& logger){
     ma_sound_stop(&current_song); //this may be redundant
     ma_sound_seek_to_pcm_frame(&current_song,0);
     ma_sound_start(&current_song);
@@ -31,7 +31,7 @@ void music_player::player::restart(logger& logger){
     logger.log("Restarted song");
 }
 
-void music_player::player::increase_volume(float value){
+void comet::player::increase_volume(float value){
     volume += value;
 
     if(volume > max_volume) volume = max_volume;
@@ -41,7 +41,7 @@ void music_player::player::increase_volume(float value){
 
 
 
-void music_player::player::seek_percentage(float interval, bool forward) {
+void comet::player::seek_percentage(float interval, bool forward) {
 
     ma_sound_stop(&current_song);
 
@@ -57,7 +57,7 @@ void music_player::player::seek_percentage(float interval, bool forward) {
 
 }
 
-std::vector<std::string>::iterator music_player::player::get_and_select_random_song(){
+std::vector<std::string>::iterator comet::player::get_and_select_random_song(){
     static std::random_device dev;
     static std::mt19937 rng(dev());
     std::uniform_int_distribution<std::mt19937::result_type> dist(0,public_song_entries.size()); 
@@ -69,7 +69,7 @@ std::vector<std::string>::iterator music_player::player::get_and_select_random_s
 }
 
 
-void music_player::player::play_next(logger& logger, bool forward){
+void comet::player::play_next(logger& logger, bool forward){
 
     auto itr {std::find(public_song_entries.begin(),public_song_entries.end(),current_song_title)};
     bool entry_found {itr != public_song_entries.end()};
@@ -95,14 +95,14 @@ void music_player::player::play_next(logger& logger, bool forward){
     }
 }
 
-void music_player::player::on_song_end(logger& logger){
+void comet::player::on_song_end(logger& logger){
     if(current_response_state == player_response_state::LOOP) restart(logger);
     if(current_response_state == player_response_state::SHUFFLE) start_song(get_and_select_random_song(),logger);
     if(current_response_state == player_response_state::PLAY_NEXT) play_next(logger);
 }
 
 //various things to update in real time
-void music_player::player::active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values){
+void comet::player::active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values){
     if(!current_song_display.empty()) {
         if(song_over()){
             on_song_end(logger);
@@ -118,17 +118,17 @@ void music_player::player::active_refresh(std::string_view current_song_display,
 }
 
 
-void music_player::player::refresh_entries(logger& logger){
+void comet::player::refresh_entries(logger& logger){
     all_song_entries = filesystem::find_song_entries(user_paths_entries,logger);
     public_song_entries = get_filtered_entries();
 
 }
 
-void music_player::player::apply_search_filter(){
+void comet::player::apply_search_filter(){
     public_song_entries = get_filtered_entries();
 }
 
-void music_player::player::clear_search(){
+void comet::player::clear_search(){
     //save what song the user had as a selection before we clear the search
     //if the current search resulted in an empty list, set the saved selection to the first element of the all-songs list
     std::string saved_search_selection {public_song_entries.size() > 0 ? public_song_entries[selected] : all_song_entries[0]};
@@ -148,7 +148,7 @@ void music_player::player::clear_search(){
 //of the split with the song title
 //if there are no spaces, it just matches the entire string with the title
 //used to filter songs with the search bar
-bool music_player::player::match_search_string (std::string input, std::string to_match){
+bool comet::player::match_search_string (std::string input, std::string to_match){
     //if there is spaces in the search, match each segment of the search (split by spaces) individually
     if(input.find(" ") != std::string::npos){
         auto splits {util::split_string(input)};
@@ -165,7 +165,7 @@ bool music_player::player::match_search_string (std::string input, std::string t
 }
 
 
-std::vector<std::string>& music_player::player::get_filtered_entries(){
+std::vector<std::string>& comet::player::get_filtered_entries(){
     //if there is a search, filter the results according to that search
     if(current_search.length() > 0){
         filtered_entries.clear();
@@ -180,7 +180,7 @@ std::vector<std::string>& music_player::player::get_filtered_entries(){
 }
 
 
-std::vector<std::string> music_player::player::get_default_path_entries(){
+std::vector<std::string> comet::player::get_default_path_entries(){
 
     std::vector<std::string> defaults{};
 
@@ -195,7 +195,7 @@ std::vector<std::string> music_player::player::get_default_path_entries(){
     return defaults;
 }
 
-std::string music_player::player::get_state_message(){
+std::string comet::player::get_state_message(){
 
     //if nothing is selected or playing say nothing
     if(current_song_title.empty() && !song_playing()){
@@ -221,7 +221,7 @@ std::string music_player::player::get_state_message(){
     return to_return;
 }
 
-void music_player::player::toggle_player_state(player_response_state desired_state){
+void comet::player::toggle_player_state(player_response_state desired_state){
     if(current_response_state == desired_state){
         current_response_state = player_response_state::PLAY_NEXT; //toggle back to default state
     }else{
@@ -230,7 +230,7 @@ void music_player::player::toggle_player_state(player_response_state desired_sta
 }
 
 
-music_player::player::player(logger& logger){
+comet::player::player(logger& logger){
 
     ma_result result;
     ma_engine_init(NULL,&engine);

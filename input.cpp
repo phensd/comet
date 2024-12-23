@@ -6,11 +6,11 @@
 
 
 
-void music_player::register_main_inputs(int& tab_selected, 
+void comet::register_main_inputs(int& tab_selected, 
                                   ftxui::Component& song_selector,
                                   ftxui::Component& search_bar,
                                   ftxui::Component& main_window,
-                                  music_player::player& engine,
+                                  comet::player& engine,
                                   logger& logger){
     //main key inputs 
     main_window |= ftxui::CatchEvent([&] (ftxui::Event event){
@@ -85,12 +85,12 @@ void music_player::register_main_inputs(int& tab_selected,
         //toggling states
         //loop
         if(event == ftxui::Event::l){
-            engine.toggle_player_state(music_player::player_response_state::LOOP);
+            engine.toggle_player_state(comet::player_response_state::LOOP);
             return true;
         }
         //shuffle
         if(event == ftxui::Event::s){
-            engine.toggle_player_state(music_player::player_response_state::SHUFFLE);
+            engine.toggle_player_state(comet::player_response_state::SHUFFLE);
             return true;
         }
 

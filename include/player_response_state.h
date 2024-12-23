@@ -1,6 +1,6 @@
 #pragma once
 //awkward header for this singular enum lol
-namespace music_player {
+namespace comet {
     enum class player_response_state {
         LOOP,
         SHUFFLE,

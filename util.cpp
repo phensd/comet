@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iomanip>
 
-std::string music_player::util::create_timestamp_string(double current_timestamp_seconds, float current_song_length_seconds){
+std::string comet::util::create_timestamp_string(double current_timestamp_seconds, float current_song_length_seconds){
 
     std::string to_return;
 
@@ -23,14 +23,14 @@ std::string music_player::util::create_timestamp_string(double current_timestamp
 }
 
 
-std::string music_player::util::lower (std::string input) {
+std::string comet::util::lower (std::string input) {
     for(int i {0}; i < input.size(); ++i) {
         input[i] = std::tolower(input[i]);
     }
     return input;
 };
 
-std::vector<std::string> music_player::util::split_string(std::string input){
+std::vector<std::string> comet::util::split_string(std::string input){
 
     std::vector<std::string> split_strings{};
     

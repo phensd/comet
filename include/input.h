@@ -3,7 +3,7 @@
 #include "logger.h"
 #include "player.h"
 
-namespace music_player{
+namespace comet{
 void register_main_inputs(int& tab_selected, 
                     ftxui::Component& song_selector,
                     ftxui::Component& search_bar,

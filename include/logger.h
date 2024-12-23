@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace music_player {
+namespace comet {
     struct logger {
 
         std::string output_file_path{};

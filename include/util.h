@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-namespace music_player::util {
+namespace comet::util {
     std::string lower (std::string input);
     std::vector<std::string> split_string(std::string input);
 

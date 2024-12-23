@@ -4,7 +4,7 @@
 #include <iostream>
 #include "include/filesystem.h"
 
-bool music_player::logger::log(const std::string& message,bool output_to_cerr){
+bool comet::logger::log(const std::string& message,bool output_to_cerr){
 
     //just remove the file if its bigger than 10mb
     if(std::filesystem::exists(output_file_path) && std::filesystem::file_size(output_file_path) > 10000000) std::filesystem::remove(output_file_path);
@@ -26,6 +26,6 @@ bool music_player::logger::log(const std::string& message,bool output_to_cerr){
     return true;
 }
 
-music_player::logger::logger(){
+comet::logger::logger(){
     output_file_path = filesystem::get_data_directory() + "comet.log";
 }

@@ -7,11 +7,11 @@
 #include <nlohmann/json.hpp>
 #include <set>
 
-std::string music_player::filesystem::get_home_dir(){
+std::string comet::filesystem::get_home_dir(){
     return (std::string) getenv("HOME") + "/";
 }
 
-std::string music_player::filesystem::get_data_directory(){
+std::string comet::filesystem::get_data_directory(){
 
     auto full_json_path {get_home_dir() + ".local/share/comet/"};
 
@@ -22,11 +22,11 @@ std::string music_player::filesystem::get_data_directory(){
 
 }
 
-bool music_player::filesystem::saved_json_exists(std::string json_path){
+bool comet::filesystem::saved_json_exists(std::string json_path){
     return std::filesystem::exists(get_data_directory() + json_path);
 }
 
-void music_player::filesystem::write_user_path_entries(std::string input_file_path,std::vector<std::string>& entries_to_write){
+void comet::filesystem::write_user_path_entries(std::string input_file_path,std::vector<std::string>& entries_to_write){
 
     //remove invalid paths from being saved
     for(auto& entry : entries_to_write){if (!std::filesystem::is_directory(entry)) entry = "";}
@@ -38,7 +38,7 @@ void music_player::filesystem::write_user_path_entries(std::string input_file_pa
 
 }
 
-std::optional<std::vector<std::string>> music_player::filesystem::load_user_path_entries(std::string input_file_path,logger& logger){
+std::optional<std::vector<std::string>> comet::filesystem::load_user_path_entries(std::string input_file_path,logger& logger){
 
     std::ifstream input_file {get_data_directory() + input_file_path};
     nlohmann::json json_input;
@@ -53,7 +53,7 @@ std::optional<std::vector<std::string>> music_player::filesystem::load_user_path
 }
 
 
-bool music_player::filesystem::validate_filetype(const std::string& path){
+bool comet::filesystem::validate_filetype(const std::string& path){
 
     std::ifstream input {path,std::fstream::binary};
                 
@@ -83,7 +83,7 @@ bool music_player::filesystem::validate_filetype(const std::string& path){
     return false;
 }
 
-std::vector<std::string> music_player::filesystem::find_song_entries(std::vector<std::string> paths,music_player::logger& logger){
+std::vector<std::string> comet::filesystem::find_song_entries(std::vector<std::string> paths,comet::logger& logger){
 
     std::set<std::string> to_return {};
 

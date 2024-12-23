@@ -4,9 +4,9 @@
 #include <string>
 #include "logger.h"
 
-namespace music_player::filesystem{
+namespace comet::filesystem{
 
-    std::vector<std::string> find_song_entries (std::vector<std::string> paths,music_player::logger& logger);
+    std::vector<std::string> find_song_entries (std::vector<std::string> paths,comet::logger& logger);
 
     bool validate_filetype(const std::string& path);
 

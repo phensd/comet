@@ -5,7 +5,7 @@
 #include "player_response_state.h"
 #include <map>
 
-namespace  music_player {
+namespace  comet {
     class player {
         private:
             float volume {0.5f};

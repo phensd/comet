@@ -20,8 +20,8 @@ int main() {
 
     
 
-    music_player::logger logger{};
-    music_player::player engine {logger};
+    comet::logger logger{};
+    comet::player engine {logger};
     
 
     auto screen = ScreenInteractive::Fullscreen();
@@ -105,7 +105,7 @@ int main() {
     });
 
 
-    music_player::register_main_inputs(tab_selected, song_selector, search_bar, main_window, engine, logger);
+    comet::register_main_inputs(tab_selected, song_selector, search_bar, main_window, engine, logger);
 
     //the main renderer/order of components
     auto component = Renderer(main_window, [&] {
@@ -160,7 +160,7 @@ int main() {
     refresh_ui_continue = false;
     refresh_ui.join();
 
-    music_player::filesystem::write_user_path_entries("comet.json", engine.user_paths_entries);
+    comet::filesystem::write_user_path_entries("comet.json", engine.user_paths_entries);
 
     return 0;
 }
