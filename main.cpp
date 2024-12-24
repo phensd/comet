@@ -1,3 +1,4 @@
+#include <ftxui/component/component_options.hpp>
 #define MINIAUDIO_IMPLEMENTATION
 #include <cstdlib>
 #include <ftxui/component/event.hpp>
@@ -13,7 +14,6 @@
 #include <cctype>
 #include "include/filesystem.h"
 #include "include/input.h"
-
 using namespace ftxui;
 
 int main() {
@@ -45,6 +45,11 @@ int main() {
         "Full path",
     };int song_title_display_option_selected {0};
     auto song_title_display_toggle = Toggle(&song_title_display_options, &song_title_display_option_selected);
+
+
+    //temporarily binding the function like this until i refactor later
+    auto button_func = [&logger,&engine] () {engine.refresh_entries(logger);};
+    auto refresh_entries_button {Button("[Refresh Entries]",button_func,ButtonOption::Ascii())};
 
 
     auto create_input_box = [&engine] (std::string& content,std::string text) {
@@ -109,7 +114,8 @@ int main() {
         tabs,
         tab_menu,
         search_bar,
-        song_title_display_toggle
+        song_title_display_toggle,
+        refresh_entries_button
     });
 
 
@@ -164,7 +170,8 @@ int main() {
                         window(text("Paths for song searches"),user_paths->Render() | frame),
                         hbox (
                             text("* Display songs by their : "),
-                            song_title_display_toggle->Render()
+                            song_title_display_toggle->Render() | flex,
+                            refresh_entries_button->Render()
                         )
 
                         
