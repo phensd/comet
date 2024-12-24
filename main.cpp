@@ -37,13 +37,7 @@ int main() {
     //the main song selector
     auto song_selector {Menu(&song_manager.public_song_ids,&engine.selected) | frame};
 
-
-    std::vector<std::string> song_title_display_options{
-        "File name",
-        "Tagged name",
-        "Full path",
-    };int song_title_display_option_selected {0};
-    auto song_title_display_toggle = Toggle(&song_title_display_options, &song_title_display_option_selected);
+    auto song_title_display_toggle = Toggle(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected);
 
 
     //temporarily binding the function like this until i refactor later
