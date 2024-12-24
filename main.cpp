@@ -22,11 +22,8 @@ int main() {
     comet::filesystem_manager fsysmanager {logger};
     comet::player engine {logger,fsysmanager};
 
-    
-
     auto screen = ScreenInteractive::Fullscreen();
 
-    
 
     std::vector<std::string> tab_values{
       "Songs", //this is adjusted in real time in player.cpp/active_refresh to add a (X) where X is the number of songs

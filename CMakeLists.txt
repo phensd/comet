@@ -19,7 +19,7 @@ project(comet CXX)
 find_package(ftxui 5 REQUIRED)
 
 
-add_executable(comet filesystem.cpp main.cpp player.cpp logger.cpp util.cpp input.cpp)
+add_executable(comet filesystem.cpp main.cpp player.cpp logger.cpp util.cpp input.cpp song_manager.cpp)
 
 
 
