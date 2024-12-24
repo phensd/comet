@@ -26,7 +26,11 @@ std::vector<std::string>& comet::song_manager::get_filtered_entries(std::string 
         filtered_song_ids.clear();
         std::copy_if(all_song_ids.begin(),all_song_ids.end(),std::back_inserter(filtered_song_ids),
         [this, current_player_search](std::string& entry){
-            return comet::player::match_search_string(current_player_search,entry);
+            song& entry_data {id_to_song_map[entry]};
+            //match the search with the full path of the song entry, instead of the chosen display id
+            //when i add the option to display the song entries by their metadata, i should
+            //have it search the metadata if available
+            return comet::player::match_search_string(current_player_search,entry_data.full_path);
         });
         return filtered_song_ids;
     }
