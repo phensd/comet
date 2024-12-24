@@ -84,9 +84,9 @@ bool comet::filesystem_manager::validate_filetype(const std::string& path){
     return false;
 }
 
-std::vector<std::string> comet::filesystem_manager::find_song_entries(comet::logger& logger){
+std::vector<std::filesystem::path> comet::filesystem_manager::find_song_entries(comet::logger& logger){
 
-    std::set<std::string> to_return {};
+    std::set<std::filesystem::path> to_return {};
 
     std::cerr << "If it takes a while to open, directories are probably being scanned slowly...";
 

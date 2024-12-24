@@ -1,8 +1,8 @@
 #include "include/player.h"
+#include "include/song_manager.h"
 #include "include/util.h"
 #include <algorithm>
 #include <cctype>
-#include <iterator>
 #include <random>
 
 void comet::player::start_song(std::vector<std::string>::iterator song_title_itr, logger& logger){
@@ -14,7 +14,7 @@ void comet::player::start_song(std::vector<std::string>::iterator song_title_itr
 
     current_song_title = *song_title_itr;
 
-    ma_sound_init_from_file(&engine, (*song_title_itr).c_str(), MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH ,NULL,NULL,&current_song);
+    ma_sound_init_from_file(&engine, smanager.id_to_song_map[(*song_title_itr).c_str()].full_path.c_str(), MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH ,NULL,NULL,&current_song);
     ma_sound_start(&current_song);
 
     //Make sure the song we started playing is selected in the player
@@ -59,36 +59,36 @@ void comet::player::seek_percentage(float interval, bool forward) {
 std::vector<std::string>::iterator comet::player::get_and_select_random_song(){
     static std::random_device dev;
     static std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> dist(0,public_song_entries.size()); 
+    std::uniform_int_distribution<std::mt19937::result_type> dist(0,smanager.public_song_ids.size()); 
 
     auto num {dist(rng)};
     selected = num;
-    return public_song_entries.begin() + num;
+    return smanager.public_song_ids.begin() + num;
 
 }
 
 
 void comet::player::play_next(logger& logger, bool forward){
 
-    auto itr {std::find(public_song_entries.begin(),public_song_entries.end(),current_song_title)};
-    bool entry_found {itr != public_song_entries.end()};
+    auto itr {std::find(smanager.public_song_ids.begin(),smanager.public_song_ids.end(),current_song_title)};
+    bool entry_found {itr != smanager.public_song_ids.end()};
 
     //if going forward..
     if(forward){
         //check if going one song forward would bring us to the end, if not then start the next song
-        if(entry_found && (itr - public_song_entries.begin()) + 1 < public_song_entries.size()){
+        if(entry_found && (itr - smanager.public_song_ids.begin()) + 1 < smanager.public_song_ids.size()){
             start_song(itr + 1,logger);
         }else{
             //if it does bring us to the end, loop back around to the beginning
-            start_song(public_song_entries.begin(),logger);
+            start_song(smanager.public_song_ids.begin(),logger);
         }
     }else{
         //ditto but backwards, if going backwards would not bring us to the beginning of the list, then go backwards 
-        if(entry_found && ( (itr - public_song_entries.begin()) - 1 ) >= 0){
+        if(entry_found && ( (itr - smanager.public_song_ids.begin()) - 1 ) >= 0){
             start_song(itr - 1,logger);
         }else{
             //if it does, then loop back around to the end
-            start_song(public_song_entries.end()-1,logger);
+            start_song(smanager.public_song_ids.end()-1,logger);
         }
 
     }
@@ -112,33 +112,33 @@ void comet::player::active_refresh(std::string_view current_song_display,logger&
 
 
     //display number of songs found in the tab
-    tab_values[0] = (std::string) "Songs" + "(" + std::to_string(public_song_entries.size()) + ")";
+    tab_values[0] = (std::string) "Songs" + "(" + std::to_string(smanager.public_song_ids.size()) + ")";
 }
 
 
 void comet::player::refresh_entries(logger& logger){
-    all_song_entries = fsysmanager.find_song_entries(logger);
-    public_song_entries = get_filtered_entries();
+    smanager.map_song_ids();
+    smanager.public_song_ids = smanager.get_filtered_entries(current_search);
 
 }
 
 void comet::player::apply_search_filter(){
-    public_song_entries = get_filtered_entries();
+    smanager.public_song_ids = smanager.get_filtered_entries(current_search);
 }
 
 void comet::player::clear_search(){
     //save what song the user had as a selection before we clear the search
     //if the current search resulted in an empty list, set the saved selection to the first element of the all-songs list
-    std::string saved_search_selection {public_song_entries.size() > 0 ? public_song_entries[selected] : all_song_entries[0]};
+    std::string saved_search_selection {smanager.public_song_ids.size() > 0 ? smanager.public_song_ids[selected] : smanager.get_all_song_ids()[0]};
 
     //clear the search input, then refresh the display
     current_search = "";
-    public_song_entries = get_filtered_entries();
+    smanager.public_song_ids = smanager.get_filtered_entries(current_search);
 
 
     //Make sure that when the search is cleared, we select the at-the-time selected song in the new context,
     //by finding the name of the song that was selected when the search was up, in the new list of songs.
-    visually_select(std::find(public_song_entries.begin(),public_song_entries.end(),saved_search_selection));
+    visually_select(std::find(smanager.public_song_ids.begin(),smanager.public_song_ids.end(),saved_search_selection));
 
 }
 
@@ -163,19 +163,6 @@ bool comet::player::match_search_string (std::string input, std::string to_match
 }
 
 
-std::vector<std::string>& comet::player::get_filtered_entries(){
-    //if there is a search, filter the results according to that search
-    if(current_search.length() > 0){
-        filtered_entries.clear();
-        std::copy_if(all_song_entries.begin(),all_song_entries.end(),std::back_inserter(filtered_entries),
-        [this](std::string& entry){
-            return match_search_string(current_search,entry);
-        });
-        return filtered_entries;
-    }
-    //if no search filter is in place, return all the songs
-    return all_song_entries;
-}
 
 
 
@@ -215,18 +202,11 @@ void comet::player::toggle_player_state(player_response_state desired_state){
 }
 
 
-comet::player::player(logger& logger,filesystem_manager& fsysmanager) : fsysmanager(fsysmanager){
+comet::player::player(logger& logger,filesystem_manager& fsysmanager,class song_manager& smanager) : fsysmanager(fsysmanager),  smanager(smanager){
 
 
     ma_result result;
     ma_engine_init(NULL,&engine);
-
-    //fill out the song entries
-    all_song_entries = fsysmanager.find_song_entries(logger);
-
-
-    //set up the song entries
-    public_song_entries = get_filtered_entries();
 
 
 }

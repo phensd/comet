@@ -1,3 +1,4 @@
+#include "include/song_manager.h"
 #include <ftxui/component/component_options.hpp>
 #define MINIAUDIO_IMPLEMENTATION
 #include <cstdlib>
@@ -20,7 +21,8 @@ int main() {
 
     comet::logger logger{};
     comet::filesystem_manager fsysmanager {logger};
-    comet::player engine {logger,fsysmanager};
+    comet::song_manager song_manager{fsysmanager,logger};
+    comet::player engine {logger,fsysmanager,song_manager};
 
     auto screen = ScreenInteractive::Fullscreen();
 
@@ -33,7 +35,7 @@ int main() {
 
 
     //the main song selector
-    auto song_selector {Menu(&engine.public_song_entries,&engine.selected) | frame};
+    auto song_selector {Menu(&song_manager.public_song_ids,&engine.selected) | frame};
 
 
     std::vector<std::string> song_title_display_options{
@@ -116,7 +118,7 @@ int main() {
     });
 
 
-    comet::register_main_inputs(tab_selected, song_selector, search_bar, main_window, engine, logger);
+    comet::register_main_inputs(tab_selected, song_selector, search_bar, main_window, engine, song_manager, logger);
 
     //the main renderer/order of components
     auto component = Renderer(main_window, [&] {

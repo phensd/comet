@@ -5,35 +5,27 @@
 #include "filesystem.h"
 #include "logger.h"
 #include "player_response_state.h"
+#include "song_manager.h"
 #include <map>
 
 namespace  comet {
     class player {
         private:
             filesystem_manager& fsysmanager;
+            song_manager& smanager;
+
 
             float volume {0.5f};
 
             float max_volume {1.0f};
             float min_volume {0.015f};
 
-            //"all song entries" contains every song entry found
-            //no matter what, while
-            //"filtered entries" is used to categorize search results
-            //the public facing one (public_song_entries)
-            //switches between pointing to these two
-            std::vector<std::string> all_song_entries {};
-            std::vector<std::string> filtered_entries {};
-
-            std::vector<std::string>& get_filtered_entries();
-            bool match_search_string (std::string input, std::string to_match);
-
 
             std::vector<std::string>::iterator get_and_select_random_song();
 
 
             //since this is a one liner now we can put it in the header by my own standards
-            void visually_select(std::vector<std::string>::iterator itr) {selected = itr - public_song_entries.begin();}
+            void visually_select(std::vector<std::string>::iterator itr) {selected = itr - smanager.public_song_ids.begin();}
 
 
 
@@ -56,8 +48,9 @@ namespace  comet {
             int selected {};
             void play_next(logger& logger, bool forward=true);
 
+            static bool match_search_string (std::string input, std::string to_match);
 
-            std::vector<std::string> public_song_entries{};
+
 
 
             void start_song(std::vector<std::string>::iterator song_title_itr,logger& logger);
@@ -98,7 +91,7 @@ namespace  comet {
             void start_loaded_song() {ma_sound_start(&current_song);}
             bool song_playing() {{return ma_sound_is_playing(&current_song);}}
 
-            player(logger& logger,filesystem_manager& fsysmanager);
+            player(logger& logger,filesystem_manager& fsysmanager,class song_manager& song_manager);
 
             //these should not exist since this class is basically a singleton
             player(const player& loan) = delete;

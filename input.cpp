@@ -3,6 +3,7 @@
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/component/event.hpp>
 #include "ftxui/component/component.hpp" 
+#include "include/song_manager.h"
 
 
 
@@ -11,6 +12,7 @@ void comet::register_main_inputs(int& tab_selected,
                                   ftxui::Component& search_bar,
                                   ftxui::Component& main_window,
                                   comet::player& engine,
+                                  comet::song_manager& song_manager,
                                   logger& logger){
     //main key inputs 
     main_window |= ftxui::CatchEvent([&] (ftxui::Event event){
@@ -60,8 +62,8 @@ void comet::register_main_inputs(int& tab_selected,
         //starting song
         if(event == ftxui::Event::Return){
             //if there are no songs to play do nothing!!!!!
-            if(engine.public_song_entries.size() < 1 ) return true;
-            engine.start_song( engine.public_song_entries.begin() + engine.selected,logger);
+            if(song_manager.public_song_ids.size() < 1 ) return true;
+            engine.start_song( song_manager.public_song_ids.begin() + engine.selected,logger);
             return true;
         }
 
