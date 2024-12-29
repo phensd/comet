@@ -34,15 +34,20 @@ int main() {
     auto tab_menu = Toggle(&tab_values, &tab_selected);
 
 
+
     //the main song selector
     auto song_selector {Menu(&song_manager.public_song_ids,&engine.selected) | frame};
 
-    auto song_title_display_toggle = Toggle(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected);
 
+    //create the menu option manually so we can modify the on_change callback
+    MenuOption option {MenuOption::Toggle()};
+    //for now on_change calls a full rescan of directories, should read from a cache and remap the ids that way instead.
+    option.on_change = [&] (void){engine.refresh_entries(logger);};
+    auto song_title_display_toggle = Menu(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected,option);
 
     //temporarily binding the function like this until i refactor later
     auto button_func = [&logger,&engine] () {engine.refresh_entries(logger);};
-    auto refresh_entries_button {Button("[Refresh Entries]",button_func,ButtonOption::Ascii())};
+    auto refresh_entries_button {Button("[Scan Directories]",button_func,ButtonOption::Ascii())};
 
 
     auto create_input_box = [&engine] (std::string& content,std::string text) {
