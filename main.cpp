@@ -46,8 +46,18 @@ int main() {
     auto song_title_display_toggle = Menu(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected,option);
 
     //temporarily binding the function like this until i refactor later
-    auto button_func = [&logger,&engine] () {engine.refresh_entries(logger);};
-    auto refresh_entries_button {Button("[Scan Directories]",button_func,ButtonOption::Ascii())};
+    auto refresh_entries_func = [&logger,&engine] () {engine.refresh_entries(logger);};
+    auto refresh_entries_button {Button("[Scan Directories]",refresh_entries_func,ButtonOption::Ascii())};
+
+    auto play_button_func = [&logger,&engine] () {engine.handle_play_button(logger);};
+    auto play_button {Button(&engine.play_button_text,play_button_func,ButtonOption::Ascii())};
+
+    auto next_song_forward_func = [&logger,&engine] () {engine.play_next(logger);};
+    auto next_song_forward_button {Button("⏭",next_song_forward_func,ButtonOption::Ascii())};
+
+    auto next_song_backward_func = [&logger,&engine] () {engine.play_next(logger,false);};
+    auto next_song_backward_button {Button("⏮",next_song_backward_func,ButtonOption::Ascii())};
+
 
 
     auto create_input_box = [&engine] (std::string& content,std::string text) {
@@ -113,7 +123,10 @@ int main() {
         tab_menu,
         search_bar,
         song_title_display_toggle,
-        refresh_entries_button
+        refresh_entries_button,
+        play_button,
+        next_song_forward_button,
+        next_song_backward_button
     });
 
 
@@ -142,8 +155,8 @@ int main() {
                         vbox(
                         
                             text(engine.get_state_message()),
-                            text(engine.current_song_title),
-                            border(gauge( (!engine.current_song_title.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
+                            hbox(text(engine.current_song_id) | flex,next_song_backward_button->Render(),play_button->Render(),next_song_forward_button->Render()),
+                            border(gauge( (!engine.current_song_id.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
 
                         ) | flex,
                         //make progress bar align (sorta) with end of the panels
@@ -193,7 +206,7 @@ int main() {
         std::this_thread::sleep_for(0.1s);
 
         //various things that need to refresh frequently 
-        screen.Post( [&] { engine.active_refresh(engine.current_song_title, logger, tab_values);});
+        screen.Post( [&] { engine.active_refresh(engine.current_song_id, logger, tab_values);});
         screen.Post(Event::Custom);
     }
   });

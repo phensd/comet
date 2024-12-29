@@ -15,6 +15,7 @@ namespace  comet {
             song_manager& smanager;
 
 
+
             float volume {0.5f};
 
             float max_volume {1.0f};
@@ -41,14 +42,20 @@ namespace  comet {
                 {player_response_state::PLAY_NEXT, ""},  
             };
 
+            void set_play_button_text();
+
        
         public:
-            std::string current_song_title{};
+            std::string current_song_id{};
             std::string current_search {};
             int selected {};
             void play_next(logger& logger, bool forward=true);
 
             static bool match_search_string (std::string input, std::string to_match);
+
+
+            std::string play_button_text {"➤"};
+
 
 
 
@@ -83,13 +90,18 @@ namespace  comet {
             void clear_search();
 
             void toggle_player_state(player_response_state desired_state);
+            
+            bool handle_play_button(logger& logger);
+            //spacebar is our pause button
+            bool handle_pause_button(logger& logger);
 
+            bool current_selection_is_not_playing();
 
             //one liners will be defined here instead of in cpp file
             bool song_over() {return ma_sound_at_end(&current_song);}
             void pause_or_stop_song() {{ma_sound_stop(&current_song);}}
             void start_loaded_song() {ma_sound_start(&current_song);}
-            bool song_playing() {{return ma_sound_is_playing(&current_song);}}
+            bool song_playing() {{return !current_song_id.empty() ? ma_sound_is_playing(&current_song) : false;}}
 
             player(logger& logger,filesystem_manager& fsysmanager,class song_manager& song_manager);
 

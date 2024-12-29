@@ -69,7 +69,7 @@ void comet::register_main_inputs(int& tab_selected,
 
         //restarting song
         if(event == ftxui::Event::r){
-            if(!engine.current_song_title.empty()) engine.restart(logger);
+            if(!engine.current_song_id.empty()) engine.restart(logger);
             return true;
         }
 
@@ -98,18 +98,7 @@ void comet::register_main_inputs(int& tab_selected,
 
         //pausing and unpausing (this is spacebar)
         if(event == ftxui::Event::Character(' ')){
-            //no song playing, do nothing
-            if(engine.current_song_title.empty()) return true;
-            //trying to unpause when a song is over will just restart it
-            if(engine.song_over()) { engine.restart(logger); return true; };
-
-
-            if(engine.song_playing()){
-                engine.pause_or_stop_song();
-            }else{
-                engine.start_loaded_song();
-            }
-            return true;
+            return engine.handle_pause_button(logger);
         }
 
         //Refresh songs list
@@ -120,7 +109,7 @@ void comet::register_main_inputs(int& tab_selected,
         }
 
         //dont let user seek if there is no data to seek
-        if(!engine.current_song_title.empty()){
+        if(!engine.current_song_id.empty()){
             //seek right
             if(event == ftxui::Event::ArrowRight){
                 engine.seek_percentage(0.025f,true);

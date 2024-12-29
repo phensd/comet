@@ -7,12 +7,12 @@
 
 void comet::player::start_song(std::vector<std::string>::iterator song_title_itr, logger& logger){
      //if a song is playing unload it
-    if(!current_song_title.empty()){
+    if(!current_song_id.empty()){
         ma_sound_stop(&current_song);
         ma_sound_uninit(&current_song);
     } 
 
-    current_song_title = *song_title_itr;
+    current_song_id = *song_title_itr;
 
     ma_sound_init_from_file(&engine, smanager.id_to_song_map[(*song_title_itr).c_str()].full_path.c_str(), MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH ,NULL,NULL,&current_song);
     ma_sound_start(&current_song);
@@ -70,7 +70,7 @@ std::vector<std::string>::iterator comet::player::get_and_select_random_song(){
 
 void comet::player::play_next(logger& logger, bool forward){
 
-    auto itr {std::find(smanager.public_song_ids.begin(),smanager.public_song_ids.end(),current_song_title)};
+    auto itr {std::find(smanager.public_song_ids.begin(),smanager.public_song_ids.end(),current_song_id)};
     bool entry_found {itr != smanager.public_song_ids.end()};
 
     //if going forward..
@@ -100,9 +100,52 @@ void comet::player::on_song_end(logger& logger){
     if(current_response_state == player_response_state::PLAY_NEXT) play_next(logger);
 }
 
+void comet::player::set_play_button_text(){
+    if(current_selection_is_not_playing() || !song_playing()){
+        play_button_text = "➤";
+    }else {
+        play_button_text = "⏸";
+    }
+
+}
+
+bool comet::player::handle_pause_button(logger& logger){
+    //no songs, return early
+    if(smanager.public_song_ids.size() < 1 ) return true;
+    //if there is nothing to pause, early return
+    if(current_song_id.empty()) return true;
+    //trying to unpause when a song is over will just restart it, early return
+    if(song_over()) { restart(logger); return true; };
+    if(song_playing()){
+        pause_or_stop_song();
+    }else{
+        start_loaded_song();
+    }
+    return true;
+}
+
+bool comet::player::current_selection_is_not_playing(){
+    return current_song_id != *(smanager.public_song_ids.begin() + selected);
+}
+
+bool comet::player::handle_play_button(logger& logger){
+    //no songs, return early
+    if(smanager.public_song_ids.size() < 1 ) return true;
+    //no song playing, do nothing
+    if(current_song_id.empty() || current_selection_is_not_playing()) {
+        start_song( smanager.public_song_ids.begin() + selected,logger);
+        return true;
+    } 
+    
+
+    return handle_pause_button(logger);
+}
+
 //various things to update in real time
 void comet::player::active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values){
     if(!current_song_display.empty()) {
+        set_play_button_text();
+
         if(song_over()){
             on_song_end(logger);
         }
@@ -170,14 +213,14 @@ bool comet::player::match_search_string (std::string input, std::string to_match
 std::string comet::player::get_state_message(){
 
     //if nothing is selected say nothing
-    if(current_song_title.empty()){
+    if(current_song_id.empty()){
         return "";
     }
 
     std::string to_return{};
 
     //on the flip side, if something is selected to be played, but nothing is playing through mAudio, say the player is paused
-    if(!current_song_title.empty() && !song_playing()){
+    if(!current_song_id.empty() && !song_playing()){
         to_return = "Paused - ";
     }else {
         //otherwise, say the player is playing a song
