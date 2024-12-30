@@ -156,11 +156,17 @@ comet::filesystem_manager::filesystem_manager(logger& logger){
     if(saved_json_exists("comet.json")) json_file = load_json_file("comet.json",logger);
 
     if(json_file.has_value()){
-        //if the json fails to parse and returns nothing then use the default entries
         user_paths_entries = json_file.value()["paths"];
         song_entry_cache = json_file.value()["cached_entries"];
+
+        //if the user modified the json in any way, make sure any invalid entries they might have added are removed.
+        std::erase_if(song_entry_cache,
+         [&] (std::filesystem::path& path)
+         //incase the user modified the json file on their own, make sure things are correct
+         {return !std::filesystem::is_regular_file(path) || !validate_filetype(path);}
+        );
     }else {
-        //if the json file doesnt exist then use the default entries too
+        //if the json fails to parse and returns nothing then use the default entries
         user_paths_entries = get_default_path_entries();
     }
 }
