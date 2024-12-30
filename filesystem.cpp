@@ -4,7 +4,6 @@
 #include <iomanip>
 #include <iostream>
 #include <nlohmann/detail/exceptions.hpp>
-#include <nlohmann/json.hpp>
 #include <set>
 
 std::string comet::filesystem_manager::get_home_dir(){
@@ -27,25 +26,25 @@ bool comet::filesystem_manager::saved_json_exists(std::string json_path){
     return std::filesystem::exists(get_data_directory() + json_path);
 }
 
-void comet::filesystem_manager::write_user_path_entries(std::string input_file_path,std::vector<std::string>& entries_to_write){
+void comet::filesystem_manager::write_json_file(std::string input_file_path){
 
     //remove invalid paths from being saved
-    for(auto& entry : entries_to_write){if (!std::filesystem::is_directory(entry)) entry = "";}
+    for(auto& entry : user_paths_entries){if (!std::filesystem::is_directory(entry)) entry = "";}
 
     std::ofstream output_file{get_data_directory() + input_file_path};
     nlohmann::json json_output;
-    json_output["paths"] = entries_to_write;
+    json_output["paths"] = user_paths_entries;
     output_file << std::setw(4) << json_output;
 
 }
 
-std::optional<std::vector<std::string>> comet::filesystem_manager::load_user_path_entries(std::string input_file_path,logger& logger){
+std::optional<nlohmann::json> comet::filesystem_manager::load_json_file(std::string input_file_path,logger& logger){
 
     std::ifstream input_file {get_data_directory() + input_file_path};
     nlohmann::json json_input;
     try {
         input_file >> json_input;
-        return json_input["paths"];
+        return json_input;
     }catch(nlohmann::detail::parse_error){
         logger.log("JSON file failed to load, parse error");
         //if the syntax is wrong we will return nothing
@@ -146,9 +145,11 @@ std::vector<std::string> comet::filesystem_manager::get_default_path_entries(){
 
 
 comet::filesystem_manager::filesystem_manager(logger& logger){
-    if(saved_json_exists("comet.json")){
+    if(saved_json_exists("comet.json")) json_file = load_json_file("comet.json",logger);
+
+    if(json_file.has_value()){
         //if the json fails to parse and returns nothing then use the default entries
-        user_paths_entries = load_user_path_entries("comet.json",logger).value_or(get_default_path_entries());
+        user_paths_entries = json_file.value()["paths"];
     }else {
         //if the json file doesnt exist then use the default entries too
         user_paths_entries = get_default_path_entries();
