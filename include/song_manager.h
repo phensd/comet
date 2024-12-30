@@ -9,8 +9,7 @@ namespace comet{
             std::string file_name{};
             std::string full_path{};
 
-
-            //todo: get tag library to add metadatas here
+            //string with meta data tags, otherwise the file name
             std::string name_pretty{};
         };
 
@@ -28,7 +27,8 @@ namespace comet{
 
         filesystem_manager& fsysmanager;
         logger& lgr;
-
+        std::string create_id(const std::filesystem::path& path, int selected_option,const std::string& name_pretty);
+        std::string create_name_pretty(const std::filesystem::path& path);
 
 
         public:
@@ -43,8 +43,8 @@ namespace comet{
 
             //used to allow the user to choose how they want the songs to be identified in the song selector
             std::vector<std::string> song_title_display_options{
-                "File name",
                 "Tagged name",
+                "File name",
                 "Full path",
             };int song_title_display_option_selected {0};
 

@@ -18,6 +18,10 @@ FetchContent_MakeAvailable(json)
 project(comet CXX)
 find_package(ftxui 5 REQUIRED)
 
+find_package(ZLIB)
+
+find_package(TagLib 2.0.0 REQUIRED)
+
 
 add_executable(comet filesystem.cpp main.cpp player.cpp logger.cpp util.cpp input.cpp song_manager.cpp)
 
@@ -28,6 +32,7 @@ target_link_libraries(comet
   PRIVATE ftxui::dom
   PRIVATE ftxui::component 
   PRIVATE nlohmann_json::nlohmann_json
+  PRIVATE TagLib::tag
 )
 
 
