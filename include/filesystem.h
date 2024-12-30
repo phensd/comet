@@ -37,7 +37,7 @@ namespace comet{
             std::string get_data_directory();
             bool saved_json_exists(std::string json_path);
 
-            std::vector<std::filesystem::path> find_song_entries (comet::logger& logger);
+            std::vector<std::filesystem::path> find_song_entries (comet::logger& logger,bool rescan=false);
             std::vector<std::string> get_default_path_entries();
 
             filesystem_manager(logger& logger);

@@ -1,4 +1,5 @@
 #include "include/filesystem.h"
+#include "nlohmann/detail/conversions/to_chars.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -34,6 +35,7 @@ void comet::filesystem_manager::write_json_file(std::string input_file_path){
     std::ofstream output_file{get_data_directory() + input_file_path};
     nlohmann::json json_output;
     json_output["paths"] = user_paths_entries;
+    json_output["cached_entries"] = song_entry_cache;
     output_file << std::setw(4) << json_output;
 
 }
@@ -83,7 +85,12 @@ bool comet::filesystem_manager::validate_filetype(const std::string& path){
     return false;
 }
 
-std::vector<std::filesystem::path> comet::filesystem_manager::find_song_entries(comet::logger& logger){
+std::vector<std::filesystem::path> comet::filesystem_manager::find_song_entries(comet::logger& logger,bool rescan){
+
+    //hopefully copying a std::filesystem::path does not cause disk i/o?
+    //according to cppreference it only *syntactically* represents a file system path
+    //so it shouldnt...?
+    if(!rescan && song_entry_cache.size() > 0 ) return song_entry_cache;
 
     std::set<std::filesystem::path> to_return {};
 
@@ -125,6 +132,7 @@ std::vector<std::filesystem::path> comet::filesystem_manager::find_song_entries(
 
     logger.log("No. entries found total " +  std::to_string(to_return.size()),true);
 
+    song_entry_cache = {to_return.begin(),to_return.end()};
     return {to_return.begin(),to_return.end()};
 }
 
@@ -150,6 +158,7 @@ comet::filesystem_manager::filesystem_manager(logger& logger){
     if(json_file.has_value()){
         //if the json fails to parse and returns nothing then use the default entries
         user_paths_entries = json_file.value()["paths"];
+        song_entry_cache = json_file.value()["cached_entries"];
     }else {
         //if the json file doesnt exist then use the default entries too
         user_paths_entries = get_default_path_entries();
