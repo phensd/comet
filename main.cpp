@@ -46,7 +46,7 @@ int main() {
     auto song_title_display_toggle = Menu(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected,option);
 
     //temporarily binding the function like this until i refactor later
-    auto refresh_entries_func = [&logger,&engine] () {engine.refresh_entries(logger);};
+    auto refresh_entries_func = [&logger,&engine] () {engine.refresh_entries(logger,true);};
     auto refresh_entries_button {Button("[Scan Directories]",refresh_entries_func,ButtonOption::Ascii())};
 
     auto play_button_func = [&logger,&engine] () {engine.handle_play_button(logger);};
@@ -78,7 +78,7 @@ int main() {
 
         input_box |= CatchEvent([&](Event event) {
             if(event == Event::Return){
-                engine.refresh_entries(logger);
+                engine.refresh_entries(logger,true);
                 return true;
             }
             return false;

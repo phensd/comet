@@ -33,7 +33,7 @@ namespace comet{
 
         public:
             const std::vector<std::string>& get_all_song_ids() {return all_song_ids;};
-            void map_song_ids();
+            void map_song_ids(bool rescan = false);
 
             std::vector<std::string>& get_filtered_entries(std::string current_player_search);
             std::unordered_map<std::string, song> id_to_song_map{};

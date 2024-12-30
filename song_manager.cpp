@@ -3,12 +3,12 @@
 #include <algorithm>
 #include <unordered_set>
 #include "include/player.h"
-void comet::song_manager::map_song_ids(){
+void comet::song_manager::map_song_ids(bool rescan){
     all_song_ids.clear();
 
     std::unordered_set<std::string> filter{};
 
-    for(std::filesystem::path& path : fsysmanager.find_song_entries(lgr)){
+    for(std::filesystem::path& path : fsysmanager.find_song_entries(lgr,rescan)){
         song new_song{};
 
         new_song.file_name = path.filename();
