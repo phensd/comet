@@ -33,13 +33,22 @@ std::string comet::song_manager::create_id(const std::filesystem::path& path,int
     return "this id should never show!!!";
 }
 
-void comet::song_manager::map_song_ids(bool rescan){
+void comet::song_manager::map_song_ids(std::string* const current_song_id, bool rescan){
 
     all_song_ids.clear();
-    
+
     std::unordered_set<std::string> filter{};
 
+    //if a song is already playing (or paused but set in the player)
+    //make sure the song id updates in the display when we remap them here
+    if(!rescan && current_song_id != nullptr && !current_song_id->empty()){
+        const song& song_data {id_to_song_map[*current_song_id]};
+        *current_song_id = create_id(song_data.full_path,song_title_display_option_selected,song_data.name_pretty);
+    }
+
     for(std::filesystem::path& path : fsysmanager.find_song_entries(lgr,rescan)){
+
+        
         song new_song{};
 
         new_song.file_name = path.filename();
@@ -48,6 +57,8 @@ void comet::song_manager::map_song_ids(bool rescan){
 
 
         auto id {create_id(path,song_title_display_option_selected,new_song.name_pretty)};
+
+        
 
         
         //if there is a duplicate ID then add (1) to it so when play_next searches for a song a duplicate wont trip it up
