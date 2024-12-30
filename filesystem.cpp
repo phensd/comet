@@ -1,5 +1,4 @@
 #include "include/filesystem.h"
-#include "nlohmann/detail/conversions/to_chars.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -36,6 +35,7 @@ void comet::filesystem_manager::write_json_file(std::string input_file_path){
     nlohmann::json json_output;
     json_output["paths"] = user_paths_entries;
     json_output["cached_entries"] = song_entry_cache;
+    json_output["song_display_option"] = saved_song_display_selection.empty() ? "Tagged name" : saved_song_display_selection;
     output_file << std::setw(4) << json_output;
 
 }
@@ -158,6 +158,7 @@ comet::filesystem_manager::filesystem_manager(logger& logger){
     if(json_file.has_value()){
         user_paths_entries = json_file.value()["paths"];
         song_entry_cache = json_file.value()["cached_entries"];
+        saved_song_display_selection = json_file.value()["song_display_option"];
 
         //if the user modified the json in any way, make sure any invalid entries they might have added are removed.
         std::erase_if(song_entry_cache,

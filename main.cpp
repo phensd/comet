@@ -41,11 +41,17 @@ int main() {
 
     //create the menu option manually so we can modify the on_change callback
     MenuOption option {MenuOption::Toggle()};
-    //for now on_change calls a full rescan of directories, should read from a cache and remap the ids that way instead.
-    option.on_change = [&] (void){engine.refresh_entries(logger);};
+    
+    //function for when the display option selection is changed
+    option.on_change = [&] (void){
+        //refresh entries, do not rescan directories
+        engine.refresh_entries(logger);
+        //save the current option in the filesystem manager so it can be saved to the JSON
+        fsysmanager.saved_song_display_selection = *(song_manager.song_title_display_options.begin() + song_manager.song_title_display_option_selected);
+    };
+
     auto song_title_display_toggle = Menu(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected,option);
 
-    //temporarily binding the function like this until i refactor later
     auto refresh_entries_func = [&logger,&engine] () {engine.refresh_entries(logger,true);};
     auto refresh_entries_button {Button("[Scan Directories]",refresh_entries_func,ButtonOption::Ascii())};
 

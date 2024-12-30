@@ -107,6 +107,13 @@ std::vector<std::string>& comet::song_manager::get_filtered_entries(std::string 
 
 
 comet::song_manager::song_manager(comet::filesystem_manager& fsysmanager,comet::logger& logger) : fsysmanager(fsysmanager), lgr(logger){
+
+    if(!fsysmanager.saved_song_display_selection.empty()){
+        auto found {std::find(song_title_display_options.begin(),song_title_display_options.end(),fsysmanager.saved_song_display_selection)};
+        if(found != song_title_display_options.end()){
+            song_title_display_option_selected = (found - song_title_display_options.begin());
+        }
+    }
     map_song_ids();
     public_song_ids = all_song_ids;
 }

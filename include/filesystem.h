@@ -31,7 +31,7 @@ namespace comet{
 
 
         public:
-
+            std::string saved_song_display_selection {};
 
             std::vector<std::string> user_paths_entries{};
             std::string get_data_directory();
