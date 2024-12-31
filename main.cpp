@@ -50,19 +50,20 @@ int main() {
         fsysmanager.saved_song_display_selection = *(song_manager.song_title_display_options.begin() + song_manager.song_title_display_option_selected);
     };
 
-    auto song_title_display_toggle = Menu(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected,option);
+    //"Maybe" decorator forces them to only be interactable on specific tabs of the player
+    auto song_title_display_toggle = Menu(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected,option) | Maybe([&] {return tab_selected == 1;});
 
     auto refresh_entries_func = [&logger,&engine] () {engine.refresh_entries(logger,true);};
-    auto refresh_entries_button {Button("[Scan Directories]",refresh_entries_func,ButtonOption::Ascii())};
+    auto refresh_entries_button {Button("[Scan Directories]",refresh_entries_func,ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 1;})};
 
     auto play_button_func = [&logger,&engine] () {engine.handle_play_button(logger);};
-    auto play_button {Button(&engine.play_button_text,play_button_func,ButtonOption::Ascii())};
+    auto play_button {Button(&engine.play_button_text,play_button_func,ButtonOption::Ascii()) | Maybe( [&] {return tab_selected == 0;})};
 
     auto next_song_forward_func = [&logger,&engine] () {engine.play_next(logger);};
-    auto next_song_forward_button {Button("⏭",next_song_forward_func,ButtonOption::Ascii())};
+    auto next_song_forward_button {Button("⏭",next_song_forward_func,ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 0;})};
 
     auto next_song_backward_func = [&logger,&engine] () {engine.play_next(logger,false);};
-    auto next_song_backward_button {Button("⏮",next_song_backward_func,ButtonOption::Ascii())};
+    auto next_song_backward_button {Button("⏮",next_song_backward_func,ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 0;})};
 
 
 
