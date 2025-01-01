@@ -18,7 +18,7 @@ void comet::player::start_song(std::vector<std::string>::iterator song_title_itr
     ma_sound_start(&current_song);
 
     //Make sure the song we started playing is selected in the player
-    visually_select(song_title_itr);
+    visually_select(*song_title_itr);
 }
 
 
@@ -163,10 +163,8 @@ void comet::player::apply_search_filter(){
     smanager.shuffled_song_ids = smanager.get_shuffled_selection();
 }
 
-//IM SURE THIS ITERATOR WILL NEVER BE INVALID RIGHT 
-void comet::player::visually_select(std::vector<std::string>::iterator itr){
-    std::string selection {*itr};
-    auto found {std::find(smanager.public_song_ids.begin(),smanager.public_song_ids.end(),selection)};
+void comet::player::visually_select(std::string id){
+    auto found {std::find(smanager.public_song_ids.begin(),smanager.public_song_ids.end(),id)};
     selected = found - smanager.public_song_ids.begin();
 }
 
@@ -184,7 +182,7 @@ void comet::player::clear_search(){
 
     //Make sure that when the search is cleared, we select the at-the-time selected song in the new context,
     //by finding the name of the song that was selected when the search was up, in the new list of songs.
-    visually_select(std::find(smanager.public_song_ids.begin(),smanager.public_song_ids.end(),saved_search_selection));
+    visually_select(saved_search_selection);
 
 }
 
