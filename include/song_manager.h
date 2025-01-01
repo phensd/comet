@@ -39,7 +39,9 @@ namespace comet{
             std::vector<std::string>& get_filtered_entries(std::string current_player_search);
             std::unordered_map<std::string, song> id_to_song_map{};
             std::vector<std::string> public_song_ids{};
+            std::vector<std::string> shuffled_song_ids{};
             song_manager(filesystem_manager& fsysmanager,struct logger& logger);
+            std::vector<std::string> get_shuffled_selection();
 
 
             //used to allow the user to choose how they want the songs to be identified in the song selector

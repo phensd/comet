@@ -1,9 +1,9 @@
 #include "include/player.h"
+#include "include/player_response_state.h"
 #include "include/song_manager.h"
 #include "include/util.h"
 #include <algorithm>
 #include <cctype>
-#include <random>
 
 void comet::player::start_song(std::vector<std::string>::iterator song_title_itr, logger& logger){
      //if a song is playing unload it
@@ -56,39 +56,30 @@ void comet::player::seek_percentage(float interval, bool forward) {
 
 }
 
-std::vector<std::string>::iterator comet::player::get_and_select_random_song(){
-    static std::random_device dev;
-    static std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> dist(0,smanager.public_song_ids.size()); 
-
-    auto num {dist(rng)};
-    selected = num;
-    return smanager.public_song_ids.begin() + num;
-
-}
-
 
 void comet::player::play_next(logger& logger, bool forward){
 
-    auto itr {std::find(smanager.public_song_ids.begin(),smanager.public_song_ids.end(),current_song_id)};
-    bool entry_found {itr != smanager.public_song_ids.end()};
+    auto& song_ids = current_response_state == player_response_state::PLAY_NEXT? smanager.public_song_ids : smanager.shuffled_song_ids;
+
+    auto itr {std::find(song_ids.begin(),song_ids.end(),current_song_id)};
+    bool entry_found {itr != song_ids.end()};
 
     //if going forward..
     if(forward){
         //check if going one song forward would bring us to the end, if not then start the next song
-        if(entry_found && (itr - smanager.public_song_ids.begin()) + 1 < smanager.public_song_ids.size()){
+        if(entry_found && (itr - song_ids.begin()) + 1 < song_ids.size()){
             start_song(itr + 1,logger);
         }else{
             //if it does bring us to the end, loop back around to the beginning
-            start_song(smanager.public_song_ids.begin(),logger);
+            start_song(song_ids.begin(),logger);
         }
     }else{
         //ditto but backwards, if going backwards would not bring us to the beginning of the list, then go backwards 
-        if(entry_found && ( (itr - smanager.public_song_ids.begin()) - 1 ) >= 0){
+        if(entry_found && ( (itr - song_ids.begin()) - 1 ) >= 0){
             start_song(itr - 1,logger);
         }else{
             //if it does, then loop back around to the end
-            start_song(smanager.public_song_ids.end()-1,logger);
+            start_song(song_ids.end()-1,logger);
         }
 
     }
@@ -96,8 +87,9 @@ void comet::player::play_next(logger& logger, bool forward){
 
 void comet::player::on_song_end(logger& logger){
     if(current_response_state == player_response_state::LOOP) restart(logger);
-    if(current_response_state == player_response_state::SHUFFLE) start_song(get_and_select_random_song(),logger);
-    if(current_response_state == player_response_state::PLAY_NEXT) play_next(logger);
+    if(current_response_state == player_response_state::SHUFFLE || current_response_state == player_response_state::PLAY_NEXT) {
+        play_next(logger);
+    }
 }
 
 void comet::player::set_play_button_text(){
@@ -162,11 +154,20 @@ void comet::player::active_refresh(std::string_view current_song_display,logger&
 void comet::player::refresh_entries(logger& logger,bool rescan){
     smanager.map_song_ids(&current_song_id,rescan);
     smanager.public_song_ids = smanager.get_filtered_entries(current_search);
+    smanager.shuffled_song_ids = smanager.get_shuffled_selection();
 
 }
 
 void comet::player::apply_search_filter(){
     smanager.public_song_ids = smanager.get_filtered_entries(current_search);
+    smanager.shuffled_song_ids = smanager.get_shuffled_selection();
+}
+
+//IM SURE THIS ITERATOR WILL NEVER BE INVALID RIGHT 
+void comet::player::visually_select(std::vector<std::string>::iterator itr){
+    std::string selection {*itr};
+    auto found {std::find(smanager.public_song_ids.begin(),smanager.public_song_ids.end(),selection)};
+    selected = found - smanager.public_song_ids.begin();
 }
 
 void comet::player::clear_search(){
@@ -177,6 +178,8 @@ void comet::player::clear_search(){
     //clear the search input, then refresh the display
     current_search = "";
     smanager.public_song_ids = smanager.get_filtered_entries(current_search);
+    //make sure the shuffled list is refreshed 
+    smanager.shuffled_song_ids = smanager.get_shuffled_selection();
 
 
     //Make sure that when the search is cleared, we select the at-the-time selected song in the new context,

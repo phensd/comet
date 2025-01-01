@@ -1,6 +1,7 @@
 #include "include/song_manager.h"
 #include "include/filesystem.h"
 #include <algorithm>
+#include <random>
 #include <taglib/fileref.h>
 #include <unordered_set>
 #include "include/player.h"
@@ -106,6 +107,19 @@ std::vector<std::string>& comet::song_manager::get_filtered_entries(std::string 
 }
 
 
+std::vector<std::string> comet::song_manager::get_shuffled_selection(){
+
+    static std::random_device dev;
+    static std::mt19937 rng(dev());
+
+    std::vector<std::string> shuffled {public_song_ids.begin(),public_song_ids.end()};
+    std::shuffle(shuffled.begin(),shuffled.end(),rng);
+
+
+    return shuffled;
+}
+
+
 comet::song_manager::song_manager(comet::filesystem_manager& fsysmanager,comet::logger& logger) : fsysmanager(fsysmanager), lgr(logger){
 
     if(!fsysmanager.saved_song_display_selection.empty()){
@@ -116,4 +130,5 @@ comet::song_manager::song_manager(comet::filesystem_manager& fsysmanager,comet::
     }
     map_song_ids();
     public_song_ids = all_song_ids;
+    shuffled_song_ids = get_shuffled_selection();
 }

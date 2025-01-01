@@ -21,12 +21,7 @@ namespace  comet {
             float max_volume {1.0f};
             float min_volume {0.015f};
 
-
-            std::vector<std::string>::iterator get_and_select_random_song();
-
-
-            //since this is a one liner now we can put it in the header by my own standards
-            void visually_select(std::vector<std::string>::iterator itr) {selected = itr - smanager.public_song_ids.begin();}
+            void visually_select(std::vector<std::string>::iterator itr);
 
 
 
@@ -60,7 +55,7 @@ namespace  comet {
 
 
 
-            void start_song(std::vector<std::string>::iterator song_title_itr,logger& logger);
+            void start_song(const std::vector<std::string>::iterator song_title_itr,logger& logger);
 
             void increase_volume(float value);
 
@@ -104,6 +99,9 @@ namespace  comet {
             bool song_playing() {{return !current_song_id.empty() ? ma_sound_is_playing(&current_song) : false;}}
 
             player(logger& logger,filesystem_manager& fsysmanager,class song_manager& song_manager);
+
+
+            const player_response_state get_current_response_state() {return current_response_state;};
 
             //these should not exist since this class is basically a singleton
             player(const player& loan) = delete;
