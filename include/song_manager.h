@@ -1,18 +1,10 @@
 #pragma once
 #include "filesystem.h"
-#include <iterator>
+#include "song.h"
 #include <unordered_map>
 namespace comet{
 
     class song_manager{
-
-        struct song {
-            std::string file_name{};
-            std::string full_path{};
-
-            //string with meta data tags, otherwise the file name
-            std::string name_pretty{};
-        };
 
 
 

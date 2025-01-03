@@ -34,8 +34,9 @@ void comet::filesystem_manager::write_json_file(std::string input_file_path){
     std::ofstream output_file{get_data_directory() + input_file_path};
     nlohmann::json json_output;
     json_output["paths"] = user_paths_entries;
-    json_output["cached_entries"] = song_entry_cache;
+    json_output["cached_entries"] = song_entry_path_cache;
     json_output["song_display_option"] = saved_song_display_selection.empty() ? "Tagged name" : saved_song_display_selection;
+    json_output["processed_song_entries"] = processed_entries_cache;
     output_file << std::setw(4) << json_output;
 
 }
@@ -90,7 +91,7 @@ std::vector<std::filesystem::path> comet::filesystem_manager::find_song_entries(
     //hopefully copying a std::filesystem::path does not cause disk i/o?
     //according to cppreference it only *syntactically* represents a file system path
     //so it shouldnt...?
-    if(!rescan && song_entry_cache.size() > 0 ) return song_entry_cache;
+    if(!rescan && song_entry_path_cache.size() > 0 ) return song_entry_path_cache;
 
     std::set<std::filesystem::path> to_return {};
 
@@ -132,7 +133,7 @@ std::vector<std::filesystem::path> comet::filesystem_manager::find_song_entries(
 
     logger.log("No. entries found total " +  std::to_string(to_return.size()),true);
 
-    song_entry_cache = {to_return.begin(),to_return.end()};
+    song_entry_path_cache = {to_return.begin(),to_return.end()};
     return {to_return.begin(),to_return.end()};
 }
 
@@ -157,15 +158,15 @@ comet::filesystem_manager::filesystem_manager(logger& logger){
 
     if(json_file.has_value()){
         user_paths_entries = json_file.value()["paths"];
-        song_entry_cache = json_file.value()["cached_entries"];
+        song_entry_path_cache = json_file.value()["cached_entries"];
         saved_song_display_selection = json_file.value()["song_display_option"];
+        processed_entries_cache = json_file.value()["processed_song_entries"];
 
         //if the user modified the json in any way, make sure any invalid entries they might have added are removed.
-        std::erase_if(song_entry_cache,
+        std::erase_if(song_entry_path_cache,
          [&] (std::filesystem::path& path)
          //incase the user modified the json file on their own, make sure things are correct
-         {return !std::filesystem::is_regular_file(path) || !validate_filetype(path);}
-        );
+         {return !std::filesystem::is_regular_file(path) || !validate_filetype(path);});
     }else {
         //if the json fails to parse and returns nothing then use the default entries
         user_paths_entries = get_default_path_entries();

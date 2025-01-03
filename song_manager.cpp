@@ -6,13 +6,13 @@
 #include <unordered_set>
 #include "include/player.h"
 
-
 std::string comet::song_manager::create_name_pretty(const std::filesystem::path& path){
     TagLib::FileRef tags {path.c_str()};
     auto tag {tags.tag()};
 
     //if there are no tags default to the filename as a safe default
     if(tag->isEmpty() || (tag->artist().isEmpty() || tag->album().isEmpty() || tag->title().isEmpty())){
+        lgr.log((std::string)"Registered file tag name: \"" + path.filename().c_str() + "\"" + " (No metadata or appropriate metadata was found, fell back to file name.)",true);
         return path.filename();
     }
 
@@ -21,6 +21,8 @@ std::string comet::song_manager::create_name_pretty(const std::filesystem::path&
     id << tag->artist() << ": " << tag->album() << " - " << tag->title();
 
 
+
+    lgr.log((std::string)"Registered file tag name: \"" + id.str() + "\"",true);
     return id.str();
 
 }
@@ -49,17 +51,19 @@ void comet::song_manager::map_song_ids(std::string* const current_song_id, bool 
 
     for(std::filesystem::path& path : fsysmanager.find_song_entries(lgr,rescan)){
 
-        
         song new_song{};
 
-        new_song.file_name = path.filename();
-        new_song.full_path = path.c_str();
-        new_song.name_pretty = create_name_pretty(path);
-
+        //if we have processed the song already, just use the one we processed
+        if(!rescan && fsysmanager.get_processed_entries_cache().contains(path)){
+            new_song = fsysmanager.get_processed_entries_cache().at(path);
+        }else{
+            new_song.file_name = path.filename();
+            new_song.full_path = path.c_str();
+            //use of cache here is mostly to avoid reading the file for the metadata every time when it is not needed.
+            new_song.name_pretty = create_name_pretty(path);
+        }
 
         auto id {create_id(path,song_title_display_option_selected,new_song.name_pretty)};
-
-        
 
         
         //if there is a duplicate ID then add (1) to it so when play_next searches for a song a duplicate wont trip it up
@@ -68,6 +72,7 @@ void comet::song_manager::map_song_ids(std::string* const current_song_id, bool 
             filter.insert(id);
         }
         id_to_song_map[id] = new_song;
+        fsysmanager.register_processed_entry(path,new_song);
     }
 
     //todo: maybe the user should be able to choose how these are sorted
