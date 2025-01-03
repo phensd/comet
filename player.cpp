@@ -59,27 +59,29 @@ void comet::player::seek_percentage(float interval, bool forward) {
 
 void comet::player::play_next(logger& logger, bool forward){
 
-    auto& song_ids = current_response_state == player_response_state::PLAY_NEXT? smanager.public_song_ids : smanager.shuffled_song_ids;
+    std::vector<std::string>* song_ids;
+    if(current_response_state == player_response_state::PLAY_NEXT || current_response_state == player_response_state::LOOP) song_ids = &smanager.public_song_ids;
+    if(current_response_state == player_response_state::SHUFFLE) song_ids = &smanager.shuffled_song_ids;
 
-    auto itr {std::find(song_ids.begin(),song_ids.end(),current_song_id)};
-    bool entry_found {itr != song_ids.end()};
+    auto itr {std::find(song_ids->begin(),song_ids->end(),current_song_id)};
+    bool entry_found {itr != song_ids->end()};
 
     //if going forward..
     if(forward){
         //check if going one song forward would bring us to the end, if not then start the next song
-        if(entry_found && (itr - song_ids.begin()) + 1 < song_ids.size()){
+        if(entry_found && (itr - song_ids->begin()) + 1 < song_ids->size()){
             start_song(itr + 1,logger);
         }else{
             //if it does bring us to the end, loop back around to the beginning
-            start_song(song_ids.begin(),logger);
+            start_song(song_ids->begin(),logger);
         }
     }else{
         //ditto but backwards, if going backwards would not bring us to the beginning of the list, then go backwards 
-        if(entry_found && ( (itr - song_ids.begin()) - 1 ) >= 0){
+        if(entry_found && ( (itr - song_ids->begin()) - 1 ) >= 0){
             start_song(itr - 1,logger);
         }else{
             //if it does, then loop back around to the end
-            start_song(song_ids.end()-1,logger);
+            start_song(song_ids->end()-1,logger);
         }
 
     }
