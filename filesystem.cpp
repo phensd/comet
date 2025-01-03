@@ -157,18 +157,28 @@ comet::filesystem_manager::filesystem_manager(logger& logger){
     if(saved_json_exists("comet.json")) json_file = load_json_file("comet.json",logger);
 
     if(json_file.has_value()){
-        user_paths_entries = json_file.value()["paths"];
-        song_entry_path_cache = json_file.value()["cached_entries"];
-        saved_song_display_selection = json_file.value()["song_display_option"];
-        processed_entries_cache = json_file.value()["processed_song_entries"];
+        //2nd arguments are default values, in case the value does not exist in the JSON value.
+        user_paths_entries = json_file.value().value("paths",get_default_path_entries());
+        song_entry_path_cache = json_file.value().value("cached_entries",std::vector<std::filesystem::path>{});
+        //"Tagged name" will be the default
+        saved_song_display_selection = json_file.value().value("song_display_option","Tagged name");
 
-        //if the user modified the json in any way, make sure any invalid entries they might have added are removed.
+        //these entries are not especially designed to be believed 
+        //that is, if the path key does not match up with a scanned/cached file path, then a new entry is created with the scanned/cached path instantly
+        processed_entries_cache = json_file.value().value("processed_song_entries",std::unordered_map<std::filesystem::path,song>{});
+
+        //if the user modified the json in any way, or files were removed, make sure any invalid song entry paths are removed.
         std::erase_if(song_entry_path_cache,
          [&] (std::filesystem::path& path)
          //incase the user modified the json file on their own, make sure things are correct
          {return !std::filesystem::is_regular_file(path) || !validate_filetype(path);});
+
+        //make sure any user paths that may have been deleted will be erased 
+        for(auto& entry : user_paths_entries){if (!std::filesystem::is_directory(entry)) entry = "";}
+
     }else {
         //if the json fails to parse and returns nothing then use the default entries
+        //every other value obtained from the json file is fine when it is default initialized
         user_paths_entries = get_default_path_entries();
     }
 }
