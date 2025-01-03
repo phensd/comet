@@ -40,6 +40,8 @@ void comet::song_manager::map_song_ids(std::string* const current_song_id, bool 
 
     all_song_ids.clear();
 
+    //this is used to stop duplicate IDs from going through
+    //instead, a "(1)" is added to the ID when it fails to insert.
     std::unordered_set<std::string> filter{};
 
     //if a song is already playing (or paused but set in the player)

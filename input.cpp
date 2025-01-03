@@ -28,6 +28,8 @@ void comet::register_main_inputs(int& tab_selected,
         if(event == ftxui::Event::Escape){
             if(search_bar->Focused()){
                 song_selector->TakeFocus();
+            }else {
+                engine.visually_select(engine.current_song_id);
             }
             return true;
         }

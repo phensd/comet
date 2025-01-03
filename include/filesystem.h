@@ -9,9 +9,6 @@
 namespace comet{
     class filesystem_manager{
 
-
-
-
         bool validate_filetype(const std::string& path);
 
         std::string get_home_dir();
@@ -47,11 +44,6 @@ namespace comet{
 
             filesystem_manager(logger& logger);
             ~filesystem_manager(){write_json_file("comet.json");}
-        
-
-
-
-
 
     };
 }

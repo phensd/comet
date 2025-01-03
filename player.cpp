@@ -128,7 +128,6 @@ bool comet::player::handle_play_button(logger& logger){
         start_song( smanager.public_song_ids.begin() + selected,logger);
         return true;
     } 
-    
 
     return handle_pause_button(logger);
 }
@@ -170,15 +169,14 @@ void comet::player::visually_select(std::string id){
 
 void comet::player::clear_search(){
     //save what song the user had as a selection before we clear the search
-    //if the current search resulted in an empty list, set the saved selection to the first element of the all-songs list
-    std::string saved_search_selection {smanager.public_song_ids.size() > 0 ? smanager.public_song_ids[selected] : smanager.get_all_song_ids()[0]};
+    //if the current search resulted in an empty list, set the saved selection to the currently playing song
+    std::string saved_search_selection {smanager.public_song_ids.size() > 0 ? smanager.public_song_ids[selected] : current_song_id};
 
     //clear the search input, then refresh the display
     current_search = "";
     smanager.public_song_ids = smanager.get_filtered_entries(current_search);
     //make sure the shuffled list is refreshed 
     smanager.shuffled_song_ids = smanager.get_shuffled_selection();
-
 
     //Make sure that when the search is cleared, we select the at-the-time selected song in the new context,
     //by finding the name of the song that was selected when the search was up, in the new list of songs.

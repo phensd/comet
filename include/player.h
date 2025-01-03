@@ -21,7 +21,6 @@ namespace  comet {
             float max_volume {1.0f};
             float min_volume {0.015f};
 
-            void visually_select(std::string id);
 
 
 
@@ -50,6 +49,7 @@ namespace  comet {
 
 
             std::string play_button_text {"➤"};
+            void visually_select(std::string id);
 
 
 
