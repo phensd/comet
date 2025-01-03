@@ -15,11 +15,14 @@ FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download
 FetchContent_MakeAvailable(json)
 
 
+FetchContent_Declare(TagLib URL https://github.com/taglib/taglib/releases/download/v2.0.2/taglib-2.0.2.tar.gz)
+FetchContent_MakeAvailable(TagLib)
+
 project(comet CXX)
+
+
 find_package(ftxui 5 REQUIRED)
-
 find_package(ZLIB)
-
 find_package(TagLib 2.0.0 REQUIRED)
 
 
