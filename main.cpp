@@ -40,10 +40,10 @@ int main() {
 
 
     //create the menu option manually so we can modify the on_change callback
-    MenuOption option {MenuOption::Toggle()};
+    MenuOption song_title_display_options {MenuOption::Toggle()};
     
     //function for when the display option selection is changed
-    option.on_change = [&] (void){
+    song_title_display_options.on_change = [&] (void){
         //refresh entries, do not rescan directories
         engine.refresh_entries(logger,false,true);
         //save the current option in the filesystem manager so it can be saved to the JSON
@@ -51,7 +51,7 @@ int main() {
     };
 
     //"Maybe" decorator forces them to only be interactable on specific tabs of the player
-    auto song_title_display_toggle = Menu(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected,option) | Maybe([&] {return tab_selected == 1;});
+    auto song_title_display_toggle = Menu(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected,song_title_display_options) | Maybe([&] {return tab_selected == 1;});
 
     auto refresh_entries_button {Button("[Scan Directories]",[&logger,&engine]{engine.refresh_entries(logger,true);},ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 1;})};
 
