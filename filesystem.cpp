@@ -34,7 +34,7 @@ void comet::filesystem_manager::write_json_file(std::string input_file_path){
     std::ofstream output_file{get_data_directory() + input_file_path};
     nlohmann::json json_output;
     json_output["paths"] = user_paths_entries;
-    json_output["cached_entries"] = song_entry_path_cache;
+    json_output["cache_scanned_paths"] = song_entry_path_cache;
     json_output["song_display_option"] = saved_song_display_selection.empty() ? "Tagged name" : saved_song_display_selection;
     json_output["processed_song_entries"] = processed_entries_cache;
     output_file << std::setw(4) << json_output;
@@ -159,7 +159,7 @@ comet::filesystem_manager::filesystem_manager(logger& logger){
     if(json_file.has_value()){
         //2nd arguments are default values, in case the value does not exist in the JSON value.
         user_paths_entries = json_file.value().value("paths",get_default_path_entries());
-        song_entry_path_cache = json_file.value().value("cached_entries",std::vector<std::filesystem::path>{});
+        song_entry_path_cache = json_file.value().value("cache_scanned_paths",std::vector<std::filesystem::path>{});
         //"Tagged name" will be the default
         saved_song_display_selection = json_file.value().value("song_display_option","Tagged name");
 

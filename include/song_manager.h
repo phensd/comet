@@ -26,7 +26,9 @@ namespace comet{
 
         public:
             const std::vector<std::string>& get_all_song_ids() {return all_song_ids;};
-            void map_song_ids(std::string* const current_song_id = nullptr,bool rescan = false);
+            //silent: determines whether or not the logger will log to cerr (causes window to flash briefly showing output)
+            //this is only used to make sure the window doesnt flash when the user changes the song id display option.
+            void map_song_ids(std::string* const current_song_id = nullptr,bool rescan = false, bool silent_log=false);
 
             std::vector<std::string>& get_filtered_entries(std::string current_player_search);
             std::unordered_map<std::string, song> id_to_song_map{};

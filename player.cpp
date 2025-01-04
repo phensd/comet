@@ -157,8 +157,8 @@ void comet::player::active_refresh(std::string_view current_song_display,logger&
 }
 
 
-void comet::player::refresh_entries(logger& logger,bool rescan){
-    smanager.map_song_ids(&current_song_id,rescan);
+void comet::player::refresh_entries(logger& logger,bool rescan,bool silent_log){
+    smanager.map_song_ids(&current_song_id,rescan,silent_log);
     smanager.public_song_ids = smanager.get_filtered_entries(current_search);
     smanager.shuffled_song_ids = smanager.get_shuffled_selection();
 

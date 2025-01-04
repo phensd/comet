@@ -36,7 +36,7 @@ std::string comet::song_manager::create_id(const std::filesystem::path& path,int
     return "this id should never show!!!";
 }
 
-void comet::song_manager::map_song_ids(std::string* const current_song_id, bool rescan){
+void comet::song_manager::map_song_ids(std::string* const current_song_id, bool rescan, bool silent_log){
 
     all_song_ids.clear();
 
@@ -57,10 +57,10 @@ void comet::song_manager::map_song_ids(std::string* const current_song_id, bool 
 
         //if we have processed the song already, just use the one we processed
         if(fsysmanager.get_processed_entries_cache().contains(path)){
-            lgr.log((std::string) "Entry already processed, taking metadata from cache - " + path.c_str(),true);
+            lgr.log((std::string) "Entry already processed, taking metadata from cache - " + path.c_str(),!silent_log);
             new_song = fsysmanager.get_processed_entries_cache().at(path);
         }else{
-            lgr.log((std::string) "Processing entry at - " + path.c_str(),true);
+            lgr.log((std::string) "Processing entry at - " + path.c_str(),!silent_log);
             new_song.file_name = path.filename();
             new_song.full_path = path.c_str();
             //use of cache here is mostly to avoid reading the file for the metadata every time when it is not needed.

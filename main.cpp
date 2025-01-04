@@ -45,7 +45,7 @@ int main() {
     //function for when the display option selection is changed
     option.on_change = [&] (void){
         //refresh entries, do not rescan directories
-        engine.refresh_entries(logger);
+        engine.refresh_entries(logger,false,true);
         //save the current option in the filesystem manager so it can be saved to the JSON
         fsysmanager.saved_song_display_selection = *(song_manager.song_title_display_options.begin() + song_manager.song_title_display_option_selected);
     };
@@ -53,17 +53,19 @@ int main() {
     //"Maybe" decorator forces them to only be interactable on specific tabs of the player
     auto song_title_display_toggle = Menu(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected,option) | Maybe([&] {return tab_selected == 1;});
 
-    auto refresh_entries_func = [&logger,&engine] () {engine.refresh_entries(logger,true);};
-    auto refresh_entries_button {Button("[Scan Directories]",refresh_entries_func,ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 1;})};
+    auto refresh_entries_button {Button("[Scan Directories]",[&logger,&engine]{engine.refresh_entries(logger,true);},ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 1;})};
 
-    auto play_button_func = [&logger,&engine] () {engine.handle_play_button(logger);};
-    auto play_button {Button(&engine.play_button_text,play_button_func,ButtonOption::Ascii()) | Maybe( [&] {return tab_selected == 0;})};
+    //this is just the ascii button option but with the transform set to not add any label upon being focused
+    ButtonOption ascii_no_transform = ButtonOption::Ascii();
+    ascii_no_transform.transform = [](const EntryState& s) {return text(" " + s.label + " ");};
+    //https://arthursonzogni.com/FTXUI/doc/component__options_8cpp_source.html (line 165)
+    auto play_button {Button(&engine.play_button_text,[&logger,&engine](){engine.handle_play_button(logger);},ascii_no_transform) | Maybe( [&] {return tab_selected == 0;})};
+    auto next_song_forward_button {Button("⏭",[&logger,&engine](){engine.play_next(logger);},ascii_no_transform) | Maybe([&] {return tab_selected == 0;})};
+    auto next_song_backward_button {Button("⏮",[&logger,&engine](){engine.play_next(logger,false);},ascii_no_transform) | Maybe([&] {return tab_selected == 0;})};
 
-    auto next_song_forward_func = [&logger,&engine] () {engine.play_next(logger);};
-    auto next_song_forward_button {Button("⏭",next_song_forward_func,ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 0;})};
 
-    auto next_song_backward_func = [&logger,&engine] () {engine.play_next(logger,false);};
-    auto next_song_backward_button {Button("⏮",next_song_backward_func,ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 0;})};
+    auto volume_up_button {Button("+",[&engine](){engine.increase_volume(0.20);},ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 0;})};
+    auto volume_down_button {Button("-",[&engine](){engine.increase_volume(-0.20);},ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 0;})};
 
 
 
@@ -133,7 +135,9 @@ int main() {
         refresh_entries_button,
         play_button,
         next_song_forward_button,
-        next_song_backward_button
+        next_song_backward_button,
+        volume_up_button,
+        volume_down_button,
     });
 
 
@@ -151,16 +155,18 @@ int main() {
                         search_bar->Render()
 
                     ),
-                    
                     hbox(
                         border(tabs->Render() | flex),
-                        border(gaugeUp(engine.get_volume()) | color(Color(182,193,253))) | size(HEIGHT,EQUAL,12)
+                        vbox(
+                            volume_up_button->Render(),
+                            border(gaugeUp(engine.get_volume()) | color(Color(182,193,253))) | size(HEIGHT,EQUAL,12),
+                            volume_down_button->Render()
+                        )
                         
                     ) | flex,
                     
                     hbox(
                         vbox(
-                        
                             text(engine.get_state_message()),
                             hbox(text(engine.current_song_id) | flex,next_song_backward_button->Render(),play_button->Render(),next_song_forward_button->Render()),
                             border(gauge( (!engine.current_song_id.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
@@ -181,7 +187,6 @@ int main() {
                         tab_menu->Render(),
                         separator(),
                         search_bar->Render()
-
                     ),
                     
                     vbox(

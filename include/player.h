@@ -69,7 +69,7 @@ namespace  comet {
 
 
             void active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values);
-            void refresh_entries(logger& logger,bool rescan=false);
+            void refresh_entries(logger& logger,bool rescan=false,bool silent_log=false);
 
             void on_song_end(logger& logger);
 
