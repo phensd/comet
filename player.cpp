@@ -39,8 +39,10 @@ void comet::player::increase_volume(float value){
 
 
 
-
 void comet::player::seek_percentage(float interval, bool forward) {
+
+    //early return if there is nothing to seek
+    if(!song_playing()) return;
 
     ma_sound_stop(&current_song);
 
@@ -62,6 +64,9 @@ void comet::player::play_next(logger& logger, bool forward){
     std::vector<std::string>* song_ids;
     if(current_response_state == player_response_state::PLAY_NEXT || current_response_state == player_response_state::LOOP) song_ids = &smanager.public_song_ids;
     if(current_response_state == player_response_state::SHUFFLE) song_ids = &smanager.shuffled_song_ids;
+
+    //if there are no songs to search through then return early and do nothing
+    if(song_ids->size() < 1) return;
 
     auto itr {std::find(song_ids->begin(),song_ids->end(),current_song_id)};
     bool entry_found {itr != song_ids->end()};
