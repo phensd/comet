@@ -86,12 +86,10 @@ void comet::song_manager::map_song_ids(std::string* const current_song_id, bool 
     auto sortby = [&] (std::string& lhs,std::string& rhs){
         song& data_lhs {id_to_song_map[lhs]};
         song& data_rhs {id_to_song_map[rhs]};
-        return data_lhs.full_path > data_rhs.full_path;
+        return data_lhs.full_path < data_rhs.full_path;
 
     };
     std::sort(all_song_ids.begin(),all_song_ids.end(),sortby);
-    //reverse it so its not backwards for whatever reason
-    std::reverse(all_song_ids.begin(),all_song_ids.end());
 
 }
 std::vector<std::string>& comet::song_manager::get_filtered_entries(std::string current_player_search){
