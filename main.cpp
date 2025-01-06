@@ -68,6 +68,10 @@ int main() {
     auto volume_down_button {Button("-",[&engine](){engine.increase_volume(-0.20);},ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 0;})};
 
 
+    auto seek_forward_button {Button("↻",[&engine](){engine.seek_percentage(0.04,true);},ascii_no_transform) | Maybe([&] {return tab_selected == 0;})};
+    auto seek_backward_button {Button("↺",[&engine](){engine.seek_percentage(0.04,false);},ascii_no_transform) | Maybe([&] {return tab_selected == 0;})};
+
+
 
     auto create_input_box = [&engine] (std::string& content,std::string text) {
         auto input {Input(&content,text)};
@@ -138,6 +142,8 @@ int main() {
         next_song_backward_button,
         volume_up_button,
         volume_down_button,
+        seek_forward_button,
+        seek_backward_button,
     });
 
 
@@ -168,7 +174,12 @@ int main() {
                     hbox(
                         vbox(
                             text(engine.get_state_message()),
-                            hbox(text(engine.current_song_id) | flex,next_song_backward_button->Render(),play_button->Render(),next_song_forward_button->Render()),
+                            hbox(text(engine.current_song_id) | flex,
+                            next_song_backward_button->Render(),
+                            seek_backward_button->Render(),
+                            play_button->Render(),
+                            seek_forward_button->Render(),
+                            next_song_forward_button->Render()),
                             border(gauge( (!engine.current_song_id.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
 
                         ) | flex,
