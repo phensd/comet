@@ -17,6 +17,7 @@
 | +/-             | Increase/decrease volume (Hold CTRL for a larger increment)  |
 | Arrows up/down, Mousewheel        | Navigate song selector  |
 | Arrows left/right            | Seek current song backwards/forwards (Hold CTRL for a larger increment) |
+| ,/.            | Play previous/next song |
 | Shift + /    | Focus search bar |
 | Del         | (Search bar) Clear current search |
 | Esc             | Highlight currently playing song, or focus song selector |
