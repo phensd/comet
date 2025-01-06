@@ -26,7 +26,7 @@
 
 # Adding songs
 
-By default, comet will add ``$HOME/Music`` to it's list of paths to search for music in. You may add additional paths in the ``Options`` tab.
+By default, comet will add ``$HOME/Music`` to it's list of paths to search for music in. You may add additional paths in the ``Options`` tab. </br>
 ![image](https://github.com/user-attachments/assets/c2179e43-5eac-469e-9454-145333380fa0) ![image](https://github.com/user-attachments/assets/2c5de2ae-2d3a-4796-a985-8c40cd72c014) </br> </br>
 Then, select how you want the songs to be displayed and press "Scan Directories"
 ![image](https://github.com/user-attachments/assets/ce0061fa-6526-43c5-b8b5-22083f028f7f)
