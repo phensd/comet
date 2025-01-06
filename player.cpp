@@ -167,11 +167,14 @@ void comet::player::refresh_entries(logger& logger,bool rescan,bool silent_log){
 void comet::player::apply_search_filter(){
     smanager.public_song_ids = smanager.get_filtered_entries(current_search);
     smanager.shuffled_song_ids = smanager.get_shuffled_selection();
+
+    //if the user is searching make sure the current song id stays selected to make it easier to track
+    if(current_search.size() >= 1) visually_select(current_song_id);
 }
 
 void comet::player::visually_select(std::string id){
     auto found {std::find(smanager.public_song_ids.begin(),smanager.public_song_ids.end(),id)};
-    selected = found - smanager.public_song_ids.begin();
+    if(found != smanager.public_song_ids.end()) selected = found - smanager.public_song_ids.begin();
 }
 
 void comet::player::clear_search(){
