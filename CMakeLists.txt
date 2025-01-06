@@ -8,14 +8,15 @@ set(FETCHCONTENT_UPDATES_DISCONNECTED TRUE)
 FetchContent_Declare(ftxui
   GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
   GIT_TAG main 
+  EXCLUDE_FROM_ALL
 )
 FetchContent_MakeAvailable(ftxui)
 
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(json)
 
 
-FetchContent_Declare(TagLib URL https://github.com/taglib/taglib/releases/download/v2.0.2/taglib-2.0.2.tar.gz)
+FetchContent_Declare(TagLib URL https://github.com/taglib/taglib/releases/download/v2.0.2/taglib-2.0.2.tar.gz EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(TagLib)
 
 project(comet CXX)
@@ -35,14 +36,14 @@ target_link_libraries(comet
   PRIVATE ftxui::dom
   PRIVATE ftxui::component 
   PRIVATE nlohmann_json::nlohmann_json
-  PRIVATE TagLib::tag
+  PRIVATE TagLib::tag 
 )
+
 
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wfatal-errors")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -s")
-
 
 set_property(TARGET comet PROPERTY CXX_STANDARD 20)
 install(TARGETS comet RUNTIME DESTINATION bin)
