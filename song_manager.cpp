@@ -70,10 +70,15 @@ void comet::song_manager::map_song_ids(std::string* const current_song_id, bool 
         auto id {create_id(path,song_title_display_option_selected,new_song.name_pretty)};
 
         
-        //if there is a duplicate ID then add (1) to it so when play_next searches for a song a duplicate wont trip it up
-        if(!filter.insert(id).second){
-            id += " (1)";
-            filter.insert(id);
+        //if there is a duplicate ID then add (1 + the amount of times it was found) to it so when play_next searches for a song a duplicate wont trip it up
+        for(int i {1}; !filter.insert(id).second; i++){
+            auto find (id.find("(" + std::to_string(i-1) + ")"));
+            if(find != std::string::npos){
+                //if there are more than nine duplicates of the same ID this will fail, fix that
+                id.replace(find,3,"(" + std::to_string(i) + ")");
+            }else {
+                id += " (1)";
+            }
         }
         id_to_song_map[id] = new_song;
         fsysmanager.register_processed_entry(path,new_song);
