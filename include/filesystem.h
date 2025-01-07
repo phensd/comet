@@ -50,7 +50,9 @@ namespace comet{
 
 
             const std::unordered_map<std::filesystem::path,song>& get_processed_entries_cache() {return processed_entries_cache;};
-            bool register_processed_entry(const std::filesystem::path& path, const song& song) {return processed_entries_cache.insert({path,song}).second;};
+            //insert_or_assign is used here to make sure if at any point an entry needs to be reprocessed 
+            //(ex. if the path key does not match the path value), that it is properly replaced.
+            void register_processed_entry(const std::filesystem::path& path, const song& song) {processed_entries_cache.insert_or_assign(path,song);};
 
 
             filesystem_manager(logger& logger);
