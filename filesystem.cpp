@@ -49,7 +49,6 @@ std::optional<nlohmann::json> comet::filesystem_manager::load_json_file(std::str
         input_file >> json_input;
         return json_input;
     }catch(nlohmann::detail::parse_error){
-        logger.log("JSON file failed to load, parse error");
         //if the syntax is wrong we will return nothing
         return std::nullopt;
     }
@@ -153,10 +152,25 @@ std::vector<std::string> comet::filesystem_manager::get_default_path_entries(){
 }
 
 
+void comet::filesystem_manager::validate(logger& logger){
+    //if the user modified the json in any way, or files were removed, make sure any invalid song entry paths are removed.
+    logger.log("Validating cached song paths...",true);
+    auto cached_entries_deleted {std::erase_if(song_entry_path_cache,
+        [&] (std::filesystem::path& path)
+        //incase the user modified the json file on their own, make sure things are correct
+        {return !std::filesystem::is_regular_file(path) || !validate_filetype(path);})};
+    logger.log("Validation finished, " + std::to_string(cached_entries_deleted) + " entries removed due to being invalid.",true);
+
+    //make sure any user paths that may have been deleted will be erased 
+    for(auto& entry : user_paths_entries){if (!std::filesystem::is_directory(entry)) entry = "";}
+
+}
+
 comet::filesystem_manager::filesystem_manager(logger& logger){
     if(saved_json_exists("comet.json")) json_file = load_json_file("comet.json",logger);
 
     if(json_file.has_value()){
+        logger.log("JSON file found and loaded.",true);
         //2nd arguments are default values, in case the value does not exist in the JSON value.
         user_paths_entries = json_file.value().value("paths",get_default_path_entries());
         song_entry_path_cache = json_file.value().value("cache_scanned_paths",std::vector<std::filesystem::path>{});
@@ -167,16 +181,13 @@ comet::filesystem_manager::filesystem_manager(logger& logger){
         //that is, if the path key does not match up with a scanned/cached file path, then a new entry is created with the scanned/cached path instantly
         processed_entries_cache = json_file.value().value("processed_song_entries",std::unordered_map<std::filesystem::path,song>{});
 
-        //if the user modified the json in any way, or files were removed, make sure any invalid song entry paths are removed.
-        std::erase_if(song_entry_path_cache,
-         [&] (std::filesystem::path& path)
-         //incase the user modified the json file on their own, make sure things are correct
-         {return !std::filesystem::is_regular_file(path) || !validate_filetype(path);});
+        //make sure the cached entries and user path entries in the JSON file are still syntactically valid
+        validate(logger);
 
-        //make sure any user paths that may have been deleted will be erased 
-        for(auto& entry : user_paths_entries){if (!std::filesystem::is_directory(entry)) entry = "";}
+
 
     }else {
+        logger.log("JSON file failed to load, most likely a parse error. Using default values.",true);
         //if the json fails to parse and returns nothing then use the default entries
         //every other value obtained from the json file is fine when it is default initialized
         user_paths_entries = get_default_path_entries();

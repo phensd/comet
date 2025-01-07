@@ -23,6 +23,8 @@ namespace comet{
 
         std::optional<nlohmann::json> load_json_file(std::string input_file_path,logger& logger);
 
+        void validate(logger& logger);
+
 
 
 
