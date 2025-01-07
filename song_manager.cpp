@@ -55,8 +55,11 @@ void comet::song_manager::map_song_ids(std::string* const current_song_id, bool 
 
         song new_song{};
 
-        //if we have processed the song already, just use the one we processed
-        if(fsysmanager.get_processed_entries_cache().contains(path)){
+        //check if the path we are looking at has already been processed
+        bool entry_processed {fsysmanager.get_processed_entries_cache().contains(path)};
+        //verify that the path between the key and the value matches aswell.
+        //incase the json was modified, this cannot be trusted as it can make the program crash.
+        if(entry_processed && fsysmanager.get_processed_entries_cache().at(path).full_path == path){
             lgr.log((std::string) "Entry already processed, taking metadata from cache - " + path.c_str(),!silent_log);
             new_song = fsysmanager.get_processed_entries_cache().at(path);
         }else{
