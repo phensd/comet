@@ -9,7 +9,7 @@
 namespace comet{
     class filesystem_manager{
 
-        bool validate_filetype(const std::string& path);
+        bool validate_filetype(const std::string& path,logger& logger);
 
         std::string get_home_dir();
         void write_json_file(std::string output_file_path);

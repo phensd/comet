@@ -55,7 +55,7 @@ std::optional<nlohmann::json> comet::filesystem_manager::load_json_file(std::str
 }
 
 
-bool comet::filesystem_manager::validate_filetype(const std::string& path){
+bool comet::filesystem_manager::validate_filetype(const std::string& path,logger& logger){
 
     std::ifstream input {path,std::fstream::binary};
                 
@@ -72,7 +72,9 @@ bool comet::filesystem_manager::validate_filetype(const std::string& path){
         "ff fb", //mp3 untagged
         "49 44 33", //mp3 tagged
         "52 49 46 46", //wav
-        "57 41 56 45" //wav secondary? wikipedia lists this but idk
+        "57 41 56 45", //wav secondary? wikipedia lists this but idk
+        "66 4c 61 43", //flac
+        "66 4C 61 43" //flac
     };
 
 
@@ -82,6 +84,7 @@ bool comet::filesystem_manager::validate_filetype(const std::string& path){
         }
     }
 
+    logger.log("Invalid magic number - " + numbers.str() + " from file at - " + path.c_str(),true);
     return false;
 }
 
@@ -115,7 +118,7 @@ std::vector<std::filesystem::path> comet::filesystem_manager::find_song_entries(
                     if(itr.depth() > 4){ itr.disable_recursion_pending();};
 
                     //validate that we can actually use the filetype before we add it
-                    if(validate_filetype(entry.path())){
+                    if(validate_filetype(entry.path(),logger)){
                         logger.log("Found entry in " + path + " " +  (std::string) entry.path(),true);
                         to_return.insert(entry.path());
                     }else {
@@ -158,7 +161,7 @@ void comet::filesystem_manager::validate(logger& logger){
     auto cached_entries_deleted {std::erase_if(song_entry_path_cache,
         [&] (std::filesystem::path& path)
         //incase the user modified the json file on their own, make sure things are correct
-        {return !std::filesystem::is_regular_file(path) || !validate_filetype(path);})};
+        {return !std::filesystem::is_regular_file(path) || !validate_filetype(path,logger);})};
     logger.log("Validation finished, " + std::to_string(cached_entries_deleted) + " entries removed due to being invalid.",true);
 
     //make sure any user paths that may have been deleted will be erased 
