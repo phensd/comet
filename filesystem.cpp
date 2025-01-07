@@ -1,4 +1,5 @@
 #include "include/filesystem.h"
+#include "include/saved_song_loadback.h"
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -37,6 +38,7 @@ void comet::filesystem_manager::write_json_file(std::string input_file_path){
     json_output["cache_scanned_paths"] = song_entry_path_cache;
     json_output["song_display_option"] = saved_song_display_selection.empty() ? "Tagged name" : saved_song_display_selection;
     json_output["processed_song_entries"] = processed_entries_cache;
+    json_output["saved_song_loadback"] = song_on_load;
     output_file << std::setw(4) << json_output;
 
 }
@@ -183,6 +185,9 @@ comet::filesystem_manager::filesystem_manager(logger& logger){
         //these entries are not especially designed to be believed 
         //that is, if the path key does not match up with a scanned/cached file path, then a new entry is created with the scanned/cached path instantly
         processed_entries_cache = json_file.value().value("processed_song_entries",std::unordered_map<std::filesystem::path,song>{});
+
+
+        song_on_load = json_file.value().value("saved_song_loadback",saved_song_loadback{});
 
         //make sure the cached entries and user path entries in the JSON file are still syntactically valid
         validate(logger);

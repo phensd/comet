@@ -13,6 +13,7 @@ namespace  comet {
         private:
             filesystem_manager& fsysmanager;
             song_manager& smanager;
+            logger& lgr;
 
 
 
@@ -29,6 +30,8 @@ namespace  comet {
 
 
             player_response_state current_response_state {player_response_state::PLAY_NEXT};
+
+            bool try_song_loadback();
 
             std::map<player_response_state,std::string> map_player_state_to_string {
                 {player_response_state::LOOP, "[Loop]"},  
@@ -55,7 +58,7 @@ namespace  comet {
 
 
 
-            void start_song(const std::vector<std::string>::iterator song_title_itr,logger& logger);
+            void start_song(const std::vector<std::string>::iterator song_title_itr,logger& logger,unsigned long long timestamp=0);
 
             void increase_volume(float value);
 
@@ -106,7 +109,7 @@ namespace  comet {
             //these should not exist since this class is basically a singleton
             player(const player& loan) = delete;
             player& operator=(const player& other) = delete;
-            ~player(){ ma_engine_uninit(&engine);}
+            ~player();
 
 
 

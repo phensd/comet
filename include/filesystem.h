@@ -5,6 +5,7 @@
 #include <string>
 #include "logger.h"
 #include "song.h"
+#include "saved_song_loadback.h"
 #include <unordered_map>
 namespace comet{
     class filesystem_manager{
@@ -25,12 +26,20 @@ namespace comet{
 
         void validate(logger& logger);
 
-
+        saved_song_loadback song_on_load {};
 
 
 
         public:
             std::string saved_song_display_selection {};
+
+            void set_song_loadback(saved_song_loadback loadback){
+                if(!loadback.empty()){
+                    this->song_on_load = loadback;
+                }
+            }
+
+            saved_song_loadback get_song_loadback(){return song_on_load;};
 
             std::vector<std::string> user_paths_entries{};
             std::string get_data_directory();

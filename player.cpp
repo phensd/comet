@@ -4,8 +4,9 @@
 #include "include/util.h"
 #include <algorithm>
 #include <cctype>
+#include <unistd.h>
 
-void comet::player::start_song(std::vector<std::string>::iterator song_title_itr, logger& logger){
+void comet::player::start_song(std::vector<std::string>::iterator song_title_itr, logger& logger,unsigned long long timestamp){
      //if a song is playing unload it
     if(!current_song_id.empty()){
         ma_sound_stop(&current_song);
@@ -16,9 +17,28 @@ void comet::player::start_song(std::vector<std::string>::iterator song_title_itr
 
     ma_sound_init_from_file(&engine, smanager.id_to_song_map[(*song_title_itr).c_str()].full_path.c_str(), MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH ,NULL,NULL,&current_song);
     ma_sound_start(&current_song);
+    ma_sound_seek_to_pcm_frame(&current_song,timestamp);
 
     //Make sure the song we started playing is selected in the player
     visually_select(*song_title_itr);
+}
+
+
+
+bool comet::player::try_song_loadback(){
+    auto loadback {fsysmanager.get_song_loadback()};
+    auto song_ids {smanager.get_all_song_ids()};
+    if(loadback.empty()) return false;
+
+    for(size_t i {0}; i < song_ids.size(); i++){
+        if(smanager.id_to_song_map[song_ids.at(i)].full_path == loadback.path){
+            start_song(i + song_ids.begin(),lgr,loadback.pcm_timestamp);
+            //dont start playing the song instantly as the program opens
+            handle_pause_button(lgr);
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -254,11 +274,19 @@ void comet::player::toggle_player_state(player_response_state desired_state){
 }
 
 
-comet::player::player(logger& logger,filesystem_manager& fsysmanager,class song_manager& smanager) : fsysmanager(fsysmanager),  smanager(smanager){
-
-
+comet::player::player(logger& logger,filesystem_manager& fsysmanager,class song_manager& smanager) : fsysmanager(fsysmanager),  smanager(smanager) , lgr(logger){
     ma_result result;
     ma_engine_init(NULL,&engine);
+    logger.log(try_song_loadback() ? "Loaded previously playing song from JSON successfully - " + fsysmanager.get_song_loadback().path : "");
+}
 
+comet::player::~player(){
+    ma_engine_uninit(&engine);
 
+    //save the current song so it can be loaded on boot
+    if(!current_song_id.empty()){
+        ma_uint64 timestamp {ma_sound_get_time_in_pcm_frames(&current_song)};
+        fsysmanager.set_song_loadback({smanager.id_to_song_map[current_song_id].full_path,timestamp});
+    };
+    
 }
