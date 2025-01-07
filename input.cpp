@@ -63,9 +63,7 @@ void comet::register_main_inputs(int& tab_selected,
 
         //starting song
         if(event == ftxui::Event::Return){
-            //if there are no songs to play do nothing!!!!!
-            if(song_manager.public_song_ids.size() < 1 ) return true;
-            engine.start_song( song_manager.public_song_ids.begin() + engine.selected,logger);
+            engine.handle_play_button(logger);
             return true;
         }
 
