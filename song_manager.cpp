@@ -88,7 +88,6 @@ void comet::song_manager::map_song_ids(std::string* const current_song_id, bool 
     }
 
     //todo: maybe the user should be able to choose how these are sorted
-
     //make sure the songs list is sorted by file name
     all_song_ids = {filter.begin(),filter.end()};
     auto sortby = [&] (std::string& lhs,std::string& rhs){
@@ -108,8 +107,6 @@ std::vector<std::string>& comet::song_manager::get_filtered_entries(std::string 
         [this, current_player_search](std::string& entry){
             song& entry_data {id_to_song_map[entry]};
             //match the search with the full path of the song entry, instead of the chosen display id
-            //when i add the option to display the song entries by their metadata, i should
-            //have it search the metadata if available
             //also search for the mp3 tagged name.
             //not sure if itll make much of a difference but may be nice to have.
             return comet::player::match_search_string(current_player_search,entry_data.full_path)

@@ -186,13 +186,11 @@ comet::filesystem_manager::filesystem_manager(logger& logger){
         //that is, if the path key does not match up with a scanned/cached file path, then a new entry is created with the scanned/cached path instantly
         processed_entries_cache = json_file.value().value("processed_song_entries",std::unordered_map<std::filesystem::path,song>{});
 
-
+        //Load the song that was playing when the player was previously open
         song_on_load = json_file.value().value("saved_song_loadback",saved_song_loadback{});
 
         //make sure the cached entries and user path entries in the JSON file are still syntactically valid
         validate(logger);
-
-
 
     }else {
         logger.log("JSON file failed to load, most likely a parse error. Using default values.",true);

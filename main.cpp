@@ -174,12 +174,14 @@ int main() {
                     hbox(
                         vbox(
                             text(engine.get_state_message()),
-                            hbox(text(engine.current_song_id) | flex,
-                            next_song_backward_button->Render(),
-                            seek_backward_button->Render(),
-                            play_button->Render(),
-                            seek_forward_button->Render(),
-                            next_song_forward_button->Render()),
+                            hbox(
+                                text(engine.current_song_id) | flex,
+                                next_song_backward_button->Render(),
+                                seek_backward_button->Render(),
+                                play_button->Render(),
+                                seek_forward_button->Render(),
+                                next_song_forward_button->Render()
+                            ),
                             border(gauge( (!engine.current_song_id.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
 
                         ) | flex,

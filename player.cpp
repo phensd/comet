@@ -29,7 +29,6 @@ bool comet::player::try_song_loadback(){
     auto loadback {fsysmanager.get_song_loadback()};
     auto song_ids {smanager.get_all_song_ids()};
     if(loadback.empty()) return false;
-
     for(size_t i {0}; i < song_ids.size(); i++){
         if(smanager.id_to_song_map[song_ids.at(i)].full_path == loadback.path){
             start_song(i + song_ids.begin(),lgr,loadback.pcm_timestamp);
@@ -235,10 +234,6 @@ bool comet::player::match_search_string (std::string input, std::string to_match
 }
 
 
-
-
-
-
 std::string comet::player::get_state_message(){
 
     //if nothing is selected say nothing
@@ -275,14 +270,12 @@ void comet::player::toggle_player_state(player_response_state desired_state){
 
 
 comet::player::player(logger& logger,filesystem_manager& fsysmanager,class song_manager& smanager) : fsysmanager(fsysmanager),  smanager(smanager) , lgr(logger){
-    ma_result result;
     ma_engine_init(NULL,&engine);
     logger.log(try_song_loadback() ? "Loaded previously playing song from JSON successfully - " + fsysmanager.get_song_loadback().path : "");
 }
 
 comet::player::~player(){
     ma_engine_uninit(&engine);
-
     //save the current song so it can be loaded on boot
     if(!current_song_id.empty()){
         ma_uint64 timestamp {ma_sound_get_time_in_pcm_frames(&current_song)};
