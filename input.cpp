@@ -63,24 +63,24 @@ void comet::register_main_inputs(int& tab_selected,
 
         //starting song
         if(event == ftxui::Event::Return){
-            engine.handle_play_button(logger);
+            engine.handle_play_button();
             return true;
         }
 
         //restarting song
         if(event == ftxui::Event::r){
-            if(!engine.current_song_id.empty()) engine.restart(logger);
+            if(!engine.current_song_id.empty()) engine.restart();
             return true;
         }
 
         //next song
         if(event == ftxui::Event::Character('.')){
-            engine.play_next(logger,true);
+            engine.play_next(true);
             return true;
         }
         //previous song
         if(event == ftxui::Event::Character(',')){
-            engine.play_next(logger,false);
+            engine.play_next(false);
             return true;
         }
 
@@ -98,13 +98,13 @@ void comet::register_main_inputs(int& tab_selected,
 
         //pausing and unpausing (this is spacebar)
         if(event == ftxui::Event::Character(' ')){
-            return engine.handle_pause_button(logger);
+            return engine.handle_pause_button();
         }
 
         //Refresh songs list
         if(event == ftxui::Event::F4){
             engine.current_search = "";
-            engine.refresh_entries(logger);
+            engine.refresh_entries();
             logger.log("Refreshed songs list");
         }
 

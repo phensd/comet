@@ -4,9 +4,10 @@
 #include "include/util.h"
 #include <algorithm>
 #include <cctype>
+#include <mutex>
 #include <unistd.h>
 
-void comet::player::start_song(std::vector<std::string>::iterator song_title_itr, logger& logger,unsigned long long timestamp){
+void comet::player::start_song(std::vector<std::string>::iterator song_title_itr,unsigned long long timestamp){
      //if a song is playing unload it
     if(!current_song_id.empty()){
         ma_sound_stop(&current_song);
@@ -31,9 +32,9 @@ bool comet::player::try_song_loadback(){
     if(loadback.empty()) return false;
     for(size_t i {0}; i < song_ids.size(); i++){
         if(smanager.id_to_song_map[song_ids.at(i)].full_path == loadback.path){
-            start_song(i + song_ids.begin(),lgr,loadback.pcm_timestamp);
+            start_song(i + song_ids.begin(),loadback.pcm_timestamp);
             //dont start playing the song instantly as the program opens
-            handle_pause_button(lgr);
+            handle_pause_button();
             return true;
         }
     }
@@ -41,12 +42,12 @@ bool comet::player::try_song_loadback(){
 }
 
 
-void comet::player::restart(logger& logger){
+void comet::player::restart(){
     ma_sound_stop(&current_song); //this may be redundant
     ma_sound_seek_to_pcm_frame(&current_song,0);
     ma_sound_start(&current_song);
 
-    logger.log("Restarted song");
+    lgr.log("Restarted song");
 }
 
 void comet::player::increase_volume(float value){
@@ -78,7 +79,7 @@ void comet::player::seek_percentage(float interval, bool forward) {
 }
 
 
-void comet::player::play_next(logger& logger, bool forward){
+void comet::player::play_next(bool forward){
 
     std::vector<std::string>* song_ids;
     if(current_response_state == player_response_state::PLAY_NEXT || current_response_state == player_response_state::LOOP) song_ids = &smanager.public_song_ids;
@@ -94,27 +95,27 @@ void comet::player::play_next(logger& logger, bool forward){
     if(forward){
         //check if going one song forward would bring us to the end, if not then start the next song
         if(entry_found && (itr - song_ids->begin()) + 1 < song_ids->size()){
-            start_song(itr + 1,logger);
+            start_song(itr + 1);
         }else{
             //if it does bring us to the end, loop back around to the beginning
-            start_song(song_ids->begin(),logger);
+            start_song(song_ids->begin());
         }
     }else{
         //ditto but backwards, if going backwards would not bring us to the beginning of the list, then go backwards 
         if(entry_found && ( (itr - song_ids->begin()) - 1 ) >= 0){
-            start_song(itr - 1,logger);
+            start_song(itr - 1);
         }else{
             //if it does, then loop back around to the end
-            start_song(song_ids->end()-1,logger);
+            start_song(song_ids->end()-1);
         }
 
     }
 }
 
-void comet::player::on_song_end(logger& logger){
-    if(current_response_state == player_response_state::LOOP) restart(logger);
+void comet::player::on_song_end(){
+    if(current_response_state == player_response_state::LOOP) restart();
     if(current_response_state == player_response_state::SHUFFLE || current_response_state == player_response_state::PLAY_NEXT) {
-        play_next(logger);
+        play_next();
     }
 }
 
@@ -127,13 +128,13 @@ void comet::player::set_play_button_text(){
 
 }
 
-bool comet::player::handle_pause_button(logger& logger){
+bool comet::player::handle_pause_button(){
     //no songs, return early
     if(smanager.public_song_ids.size() < 1 ) return true;
     //if there is nothing to pause, early return
     if(current_song_id.empty()) return true;
     //trying to unpause when a song is over will just restart it, early return
-    if(song_over()) { restart(logger); return true; };
+    if(song_over()) { restart(); return true; };
     if(song_playing()){
         pause_or_stop_song();
     }else{
@@ -146,25 +147,25 @@ bool comet::player::current_selection_is_not_playing(){
     return current_song_id != *(smanager.public_song_ids.begin() + selected);
 }
 
-bool comet::player::handle_play_button(logger& logger){
+bool comet::player::handle_play_button(){
     //no songs, return early
     if(smanager.public_song_ids.size() < 1 ) return true;
-    //no song playing, do nothing
+    //no song playing, play the currently highlighted song
     if(current_song_id.empty() || current_selection_is_not_playing()) {
-        start_song( smanager.public_song_ids.begin() + selected,logger);
+        start_song( smanager.public_song_ids.begin() + selected);
         return true;
     } 
 
-    return handle_pause_button(logger);
+    return handle_pause_button();
 }
 
 //various things to update in real time
-void comet::player::active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values){
+void comet::player::active_refresh(std::string_view current_song_display,std::vector<std::string>& tab_values){
     if(!current_song_display.empty()) {
         set_play_button_text();
 
         if(song_over()){
-            on_song_end(logger);
+            on_song_end();
         }
         //update volume of song
         ma_sound_set_volume(&current_song,get_volume());
@@ -176,7 +177,7 @@ void comet::player::active_refresh(std::string_view current_song_display,logger&
 }
 
 
-void comet::player::refresh_entries(logger& logger,bool rescan,bool silent_log){
+void comet::player::refresh_entries(bool rescan,bool silent_log){
     smanager.map_song_ids(&current_song_id,rescan,silent_log);
     smanager.public_song_ids = smanager.get_filtered_entries(current_search);
     smanager.shuffled_song_ids = smanager.get_shuffled_selection();
@@ -269,9 +270,38 @@ void comet::player::toggle_player_state(player_response_state desired_state){
 }
 
 
-comet::player::player(logger& logger,filesystem_manager& fsysmanager,class song_manager& smanager) : fsysmanager(fsysmanager),  smanager(smanager) , lgr(logger){
+
+//functions tailored to the mpris specification.
+// https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html
+void comet::player::mpris_function_play(){
+
+    //"If CanPlay is false, attempting to call this method should have no effect."    
+    //todo
+
+    //"If there is no track to play, this has no effect."
+    if(smanager.public_song_ids.size() < 1 ) return;
+
+    //Starts or resumes playback.
+    if(current_song_id.empty() || current_selection_is_not_playing()) {
+        start_song( smanager.public_song_ids.begin() + selected);
+        return;
+    } 
+
+    //"If already playing, this has no effect.""
+    if(song_playing()){
+        return;
+    }else{
+    //"If paused, playback resumes from the current position."
+        start_loaded_song();
+    }
+
+    return;
+}
+
+comet::player::player(logger& logger, filesystem_manager& fsysmanager,class song_manager& smanager) : fsysmanager(fsysmanager),  smanager(smanager) , lgr(logger){
     ma_engine_init(NULL,&engine);
     logger.log(try_song_loadback() ? "Loaded previously playing song from JSON successfully - " + fsysmanager.get_song_loadback().path : "");
+    this->lgr = logger;
 }
 
 comet::player::~player(){

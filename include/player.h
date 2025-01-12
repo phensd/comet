@@ -46,7 +46,7 @@ namespace  comet {
             std::string current_song_id{};
             std::string current_search {};
             int selected {};
-            void play_next(logger& logger, bool forward=true);
+            void play_next(bool forward=true);
 
             static bool match_search_string (std::string input, std::string to_match);
 
@@ -58,7 +58,7 @@ namespace  comet {
 
 
 
-            void start_song(const std::vector<std::string>::iterator song_title_itr,logger& logger,unsigned long long timestamp=0);
+            void start_song(const std::vector<std::string>::iterator song_title_itr,unsigned long long timestamp=0);
 
             void increase_volume(float value);
 
@@ -66,18 +66,19 @@ namespace  comet {
             double get_current_timestamp_seconds() { return ma_sound_get_time_in_milliseconds(&current_song)/1000.0f; };
 
 
-            void restart(logger& logger);
+            void restart( );
 
             void seek_percentage(float interval, bool forward);
 
 
-            void active_refresh(std::string_view current_song_display,logger& logger,std::vector<std::string>& tab_values);
-            void refresh_entries(logger& logger,bool rescan=false,bool silent_log=false);
+            void active_refresh(std::string_view current_song_display,std::vector<std::string>& tab_values);
+            void refresh_entries(bool rescan=false,bool silent_log=false);
 
-            void on_song_end(logger& logger);
+            void on_song_end();
 
 
             std::string get_state_message();
+            
 
             //volume gauge needs this
             float get_max_volume(){return max_volume;}
@@ -89,9 +90,9 @@ namespace  comet {
 
             void toggle_player_state(player_response_state desired_state);
             
-            bool handle_play_button(logger& logger);
+            bool handle_play_button();
             //spacebar is our pause button
-            bool handle_pause_button(logger& logger);
+            bool handle_pause_button();
 
             bool current_selection_is_not_playing();
 
@@ -100,6 +101,10 @@ namespace  comet {
             void pause_or_stop_song() {{ma_sound_stop(&current_song);}}
             void start_loaded_song() {ma_sound_start(&current_song);}
             bool song_playing() {{return !current_song_id.empty() ? ma_sound_is_playing(&current_song) : false;}}
+
+
+            //mpris specification functions
+            void mpris_function_play();
 
             player(logger& logger,filesystem_manager& fsysmanager,class song_manager& song_manager);
 
