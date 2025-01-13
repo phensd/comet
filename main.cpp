@@ -1,6 +1,7 @@
+#define MINIAUDIO_IMPLEMENTATION
+#include "include/mpris_handler.h"
 #include "include/song_manager.h"
 #include <ftxui/component/component_options.hpp>
-#define MINIAUDIO_IMPLEMENTATION
 #include <cstdlib>
 #include <ftxui/component/event.hpp>
 #include <ftxui/component/mouse.hpp>
@@ -23,7 +24,8 @@ int main() {
     comet::filesystem_manager fsysmanager {logger};
     comet::song_manager song_manager{fsysmanager,logger};
     comet::player engine {logger,fsysmanager,song_manager};
-
+    comet::mpris_handler mpris_handler {&engine};
+    
     auto screen = ScreenInteractive::Fullscreen();
 
 
@@ -45,7 +47,7 @@ int main() {
     //function for when the display option selection is changed
     song_title_display_options.on_change = [&] (void){
         //refresh entries, do not rescan directories
-        engine.refresh_entries(logger,false,true);
+        engine.refresh_entries(false,true);
         //save the current option in the filesystem manager so it can be saved to the JSON
         fsysmanager.saved_song_display_selection = *(song_manager.song_title_display_options.begin() + song_manager.song_title_display_option_selected);
     };
@@ -53,15 +55,15 @@ int main() {
     //"Maybe" decorator forces them to only be interactable on specific tabs of the player
     auto song_title_display_toggle = Menu(&song_manager.song_title_display_options, &song_manager.song_title_display_option_selected,song_title_display_options) | Maybe([&] {return tab_selected == 1;});
 
-    auto refresh_entries_button {Button("[Scan Directories]",[&logger,&engine]{engine.refresh_entries(logger,true);},ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 1;})};
+    auto refresh_entries_button {Button("[Scan Directories]",[&engine]{engine.refresh_entries(true);},ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 1;})};
 
     //this is just the ascii button option but with the transform set to not add any label upon being focused
     ButtonOption ascii_no_transform = ButtonOption::Ascii();
     ascii_no_transform.transform = [](const EntryState& s) {return text(" " + s.label + " ");};
     //https://arthursonzogni.com/FTXUI/doc/component__options_8cpp_source.html (line 165)
-    auto play_button {Button(&engine.play_button_text,[&logger,&engine](){engine.handle_play_button(logger);},ascii_no_transform) | Maybe( [&] {return tab_selected == 0;})};
-    auto next_song_forward_button {Button("⏭",[&logger,&engine](){engine.play_next(logger);},ascii_no_transform) | Maybe([&] {return tab_selected == 0;})};
-    auto next_song_backward_button {Button("⏮",[&logger,&engine](){engine.play_next(logger,false);},ascii_no_transform) | Maybe([&] {return tab_selected == 0;})};
+    auto play_button {Button(&engine.play_button_text,[&engine](){engine.handle_play_button();},ascii_no_transform) | Maybe( [&] {return tab_selected == 0;})};
+    auto next_song_forward_button {Button("⏭",[&engine](){engine.play_next();},ascii_no_transform) | Maybe([&] {return tab_selected == 0;})};
+    auto next_song_backward_button {Button("⏮",[&engine](){engine.play_next(false);},ascii_no_transform) | Maybe([&] {return tab_selected == 0;})};
 
 
     auto volume_up_button {Button("+",[&engine](){engine.increase_volume(0.20);},ButtonOption::Ascii()) | Maybe([&] {return tab_selected == 0;})};
@@ -91,7 +93,7 @@ int main() {
 
         input_box |= CatchEvent([&](Event event) {
             if(event == Event::Return){
-                engine.refresh_entries(logger,true);
+                engine.refresh_entries(true);
                 return true;
             }
             return false;
@@ -182,7 +184,7 @@ int main() {
                                 seek_forward_button->Render(),
                                 next_song_forward_button->Render()
                             ),
-                            border(gauge( (!engine.current_song_id.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253) ))
+                            border(gauge( (!engine.current_song_id.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253))) | size(HEIGHT,EQUAL,3)
 
                         ) | flex,
                         //make progress bar align (sorta) with end of the panels
@@ -230,14 +232,23 @@ int main() {
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(0.1s);
 
+
         //various things that need to refresh frequently 
-        screen.Post( [&] { engine.active_refresh(engine.current_song_id, logger, tab_values);});
+        screen.Post( [&] { engine.active_refresh(engine.current_song_id,tab_values);});
         screen.Post(Event::Custom);
     }
   });
+    
+
+        
+    std::thread run_mpris_handler([&] { mpris_handler.run();});
 
     screen.Loop(component);
     refresh_ui_continue = false;
+
+    mpris_handler.stop();
+    run_mpris_handler.join();
+
     refresh_ui.join();
 
 

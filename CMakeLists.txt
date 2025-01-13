@@ -19,28 +19,48 @@ FetchContent_MakeAvailable(json)
 FetchContent_Declare(TagLib URL https://github.com/taglib/taglib/releases/download/v2.0.2/taglib-2.0.2.tar.gz EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(TagLib)
 
-project(comet CXX)
 
+project(comet CXX C)
 
+find_package(PkgConfig REQUIRED)
 find_package(ftxui 5 REQUIRED)
 find_package(ZLIB)
 find_package(TagLib 2.0.0 REQUIRED)
+pkg_check_modules(GLIB glib-2.0 gio-2.0 REQUIRED)
 
 
-add_executable(comet filesystem.cpp main.cpp player.cpp logger.cpp util.cpp input.cpp song_manager.cpp)
+add_executable(comet 
+              filesystem.cpp 
+              main.cpp 
+              player.cpp
+              logger.cpp
+              util.cpp
+              input.cpp
+              song_manager.cpp
+              ../dbus/mpris.c
+              mpris_handler.cpp
+              )
 
+
+
+
+
+target_include_directories(comet PUBLIC ${GLIB_INCLUDE_DIRS})
 
 
 target_link_libraries(comet
-  PRIVATE ftxui::screen
-  PRIVATE ftxui::dom
-  PRIVATE ftxui::component 
-  PRIVATE nlohmann_json::nlohmann_json
-  PRIVATE TagLib::tag 
+  PUBLIC ftxui::screen
+  PUBLIC ftxui::dom
+  PUBLIC ftxui::component 
+  PUBLIC nlohmann_json::nlohmann_json
+  PUBLIC TagLib::tag 
+  PUBLIC ${GLIB_LDFLAGS}
 )
 
 
 
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wfatal-errors")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -s")
