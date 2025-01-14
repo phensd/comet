@@ -32,7 +32,7 @@ pkg_check_modules(GLIB glib-2.0 gio-2.0 REQUIRED)
 execute_process(COMMAND bash -c "gdbus-codegen --generate-c-code mpris --c-namespace comet --output-directory ../dbus --interface-prefix org.mpris. ../dbus/service.xml")
 
 #Ditto, but is placed into the makefile and executes when running make.
-add_custom_target(generate_dbus_boilerplate ALL COMMAND bash -c "gdbus-codegen --generate-c-code mpris --c-namespace comet --output-directory ../dbus --interface-prefix org.mpris. ../dbus/service.xml")
+#add_custom_target(generate_dbus_boilerplate ALL COMMAND bash -c "gdbus-codegen --generate-c-code mpris --c-namespace comet --output-directory ../dbus --interface-prefix org.mpris. ../dbus/service.xml")
 
 add_executable(comet 
               filesystem.cpp 
