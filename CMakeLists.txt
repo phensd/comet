@@ -29,6 +29,10 @@ find_package(TagLib 2.0.0 REQUIRED)
 pkg_check_modules(GLIB glib-2.0 gio-2.0 REQUIRED)
 
 
+#Generates the gdbus boilerplate files
+execute_process(COMMAND bash -c "gdbus-codegen --generate-c-code mpris --c-namespace comet --output-directory ../dbus --interface-prefix org.mpris. ../dbus/service.xml")
+
+
 add_executable(comet 
               filesystem.cpp 
               main.cpp 

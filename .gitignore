@@ -39,3 +39,8 @@ build
 
 compile_commands.json
 .cache
+
+#dbus boilerplate files
+#these are generated when running make, no need to track.
+..dbus/mpris.c
+..dbus/mpris.h
