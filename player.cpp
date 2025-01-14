@@ -6,6 +6,7 @@
 #include <cctype>
 #include <mutex>
 #include <unistd.h>
+#include "include/mpris_handler.h"
 
 void comet::player::start_song(std::vector<std::string>::iterator song_title_itr,unsigned long long timestamp){
      //if a song is playing unload it
@@ -22,6 +23,7 @@ void comet::player::start_song(std::vector<std::string>::iterator song_title_itr
 
     //Make sure the song we started playing is selected in the player
     visually_select(*song_title_itr);
+
 }
 
 
@@ -52,6 +54,13 @@ void comet::player::restart(){
 
 void comet::player::increase_volume(float value){
     volume += value;
+
+    if(volume > max_volume) volume = max_volume;
+    if(volume < 0.0f) volume = min_volume;
+}
+
+void comet::player::set_volume(double value){
+    volume = value;
 
     if(volume > max_volume) volume = max_volume;
     if(volume < 0.0f) volume = min_volume;
@@ -296,6 +305,11 @@ void comet::player::mpris_function_play(){
     }
 
     return;
+}
+
+void comet::player::mpris_function_playpause(){
+    //this happens to fit.
+    handle_pause_button();
 }
 
 comet::player::player(logger& logger, filesystem_manager& fsysmanager,class song_manager& smanager) : fsysmanager(fsysmanager),  smanager(smanager) , lgr(logger){

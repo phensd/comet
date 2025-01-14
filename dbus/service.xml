@@ -3,6 +3,8 @@
 <interface name="org.mpris.MediaPlayer2.Player">
     <method name="Play">
     </method>
+    <method name="PlayPause">
+    </method>
     <property name="Volume" type="d" access="readwrite" />
   </interface>
 </node>

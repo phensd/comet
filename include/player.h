@@ -19,8 +19,8 @@ namespace  comet {
 
             float volume {0.5f};
 
-            float max_volume {1.0f};
-            float min_volume {0.015f};
+            const float max_volume {1.0f};
+            const float min_volume {0.015f};
 
 
 
@@ -61,6 +61,8 @@ namespace  comet {
             void start_song(const std::vector<std::string>::iterator song_title_itr,unsigned long long timestamp=0);
 
             void increase_volume(float value);
+            void set_volume(double value);
+
 
             float get_current_song_length_seconds() {float length; ma_sound_get_length_in_seconds(&current_song, &length); return length;}
             double get_current_timestamp_seconds() { return ma_sound_get_time_in_milliseconds(&current_song)/1000.0f; };
@@ -105,6 +107,7 @@ namespace  comet {
 
             //mpris specification functions
             void mpris_function_play();
+            void mpris_function_playpause();
 
             player(logger& logger,filesystem_manager& fsysmanager,class song_manager& song_manager);
 

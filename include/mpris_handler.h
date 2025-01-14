@@ -13,7 +13,7 @@ namespace comet {
     inline static cometMediaPlayer2Player* skeleton;
 
 
-    static gboolean on_handle_play(cometMediaPlayer2Player * skeleton, GDBusMethodInvocation* invocation);
+    // static gboolean on_handle_play(cometMediaPlayer2Player * skeleton, GDBusMethodInvocation* invocation);
 
 
     static void handle_method_call (GDBusConnection       *connection,
@@ -57,13 +57,17 @@ namespace comet {
 
     inline static const std::string server_bus_name {"org.mpris.MediaPlayer2.comet"};
 
+    static void on_name_acquired(GDBusConnection* connection, const gchar* name, gpointer user_data);
+    static void on_bus_acquired(GDBusConnection* connection, const gchar* name, gpointer user_data);
+
 
     public:
         void run();
         void stop();
-        static void on_name_acquired(GDBusConnection* connection, const gchar* name, gpointer user_data);
-        static void on_bus_acquired(GDBusConnection* connection, const gchar* name, gpointer user_data);
+       
         mpris_handler(player* comet_player);
+
+        // static void emit_property_changed();
 
 };
 

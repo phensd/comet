@@ -1,7 +1,5 @@
 #include "include/mpris_handler.h"
 #include "dbus/mpris.h"
-#include "gio/gio.h"
-#include "glib.h"
 #include <cstddef>
 
 
@@ -41,6 +39,12 @@ void comet::mpris_handler::handle_method_call (GDBusConnection       *connection
 
                     }
 
+                    if (g_strcmp0 (method_name, "PlayPause") == 0)
+                    {
+                        comet_player->mpris_function_playpause();
+                        comet_media_player2_player_complete_play_pause(skeleton, invocation);
+                    }
+
 
                 }
 
@@ -74,11 +78,10 @@ GVariant* comet::mpris_handler::handle_get_property(GDBusConnection  *connection
 
                         if (g_strcmp0 (property_name, "Volume") == 0)
                         {
-                        ret = g_variant_new_string (std::to_string(comet_player->get_volume()).c_str());
+                        ret = g_variant_new_double (comet_player->get_volume());
                         }
 
                         return ret;
-
 
                     }
 
@@ -93,10 +96,14 @@ gboolean comet::mpris_handler::handle_set_property (GDBusConnection  *connection
                     {   
                         GError* error_local {NULL};
                         
+                        //This does not work!! I have no idea why.
                         if (g_strcmp0 (property_name, "Volume") == 0)
                         {
                             
                             auto volume {g_variant_get_double(value)};
+
+
+                            comet_player->set_volume(volume);
 
                             g_dbus_connection_emit_signal (connection,
                                          NULL,
@@ -141,13 +148,13 @@ void comet::mpris_handler::stop(){
 }
 
 
-gboolean comet::mpris_handler::on_handle_play(cometMediaPlayer2Player * skeleton, GDBusMethodInvocation* invocation) {
-    // comet_player->mpris_function_play();
-    // comet_media_player2_player_complete_play(skeleton, invocation);
+// gboolean comet::mpris_handler::on_handle_play(cometMediaPlayer2Player * skeleton, GDBusMethodInvocation* invocation) {
+//     // comet_player->mpris_function_play();
+//     // comet_media_player2_player_complete_play(skeleton, invocation);
 
-    // gchar* response;
-    // response = g_strdup_printf ("Hello world!!.");
-    // g_print("%s\n", response);
-	// g_free (response);
-    return true;;   
-}
+//     // gchar* response;
+//     // response = g_strdup_printf ("Hello world!!.");
+//     // g_print("%s\n", response);
+// 	// g_free (response);
+//     return true;;   
+// }
