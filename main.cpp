@@ -225,11 +225,9 @@ int main() {
                             song_title_display_toggle->Render() | flex,
                             refresh_entries_button->Render()
                         )
-
-                        
                     ) | flex,
-                    
-                })
+                })| flex,
+                error_message_display->Render()
             });
         }
         //this is here for now to get the compiler to shut up about no return in non void function
@@ -247,6 +245,10 @@ int main() {
         std::this_thread::sleep_for(0.1s);
 
         error_message_display_text = logger.error_message_topmost();
+        //show the amount of errors
+        if(logger.error_message_count() > 1){
+            error_message_display_text += " [" + std::to_string(logger.error_message_count()) + "]";
+        }
 
         //various things that need to refresh frequently 
         screen.Post( [&] { engine.active_refresh(engine.current_song_id,tab_values);});
