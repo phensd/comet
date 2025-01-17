@@ -25,10 +25,19 @@ bool comet::logger::log(const std::string& message,bool output_to_cerr){
     return true;
 }
 
+void comet::logger::pop_error_messages(){
+    if(error_message_count() < 1) return;
+
+    error_timer_current -= 0.1f;
+    if(error_timer_current <= 0){
+        error_queue.pop();
+        error_timer_current = error_timer_max;
+    }
+}
 
 //for displaying errors to the user on the bottom of the screen.
 std::string comet::logger::error_message_topmost(){
-    return error_queue.size() > 0 ? error_queue.front() : "";
+    return error_message_count()  > 0 ? error_queue.front() : "";
 };
 
 size_t comet::logger::error_message_count(){
