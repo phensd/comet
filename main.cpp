@@ -76,6 +76,17 @@ int main() {
 
 
 
+    //Button option that *just* displays the label. Nothing else.
+    ButtonOption just_text = ButtonOption::Ascii();
+    just_text.transform = [](const EntryState& s) {return text(s.label);};
+    //I want this component to be hidden entirely unless there is an error to display,
+    //since the Text element cannot be hidden with a "Maybe", I used this instead.
+    //the text displayed here is updated along with the rest of the ui every 0.1 seconds at the bottom of this file.
+    auto error_message_display_text {logger.error_message_topmost()};
+    auto error_message_display {Button(&error_message_display_text,[](){},just_text) | Maybe([&] {return logger.error_message_count() >= 1;})};
+
+
+
     auto create_input_box = [&engine] (std::string& content,std::string text) {
         auto input {Input(&content,text)};
         //make sure all input boxes refuse the enter key 
@@ -147,6 +158,7 @@ int main() {
         volume_down_button,
         seek_forward_button,
         seek_backward_button,
+        error_message_display
     });
 
 
@@ -185,8 +197,8 @@ int main() {
                                 seek_forward_button->Render(),
                                 next_song_forward_button->Render()
                             ),
-                            border(gauge( (!engine.current_song_id.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253))) | size(HEIGHT,EQUAL,3),
-                            text(logger.error_message_topmost())
+                            border(gauge( (!engine.current_song_id.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253))) | size(HEIGHT,EQUAL,3) | flex,
+                            error_message_display->Render()
 
                         ) | flex,
                         //make progress bar align (sorta) with end of the panels
@@ -234,6 +246,7 @@ int main() {
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(0.1s);
 
+        error_message_display_text = logger.error_message_topmost();
 
         //various things that need to refresh frequently 
         screen.Post( [&] { engine.active_refresh(engine.current_song_id,tab_values);});
