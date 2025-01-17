@@ -159,12 +159,13 @@ std::vector<std::string> comet::filesystem_manager::get_default_path_entries(){
 
 void comet::filesystem_manager::validate(logger& logger){
     //if the user modified the json in any way, or files were removed, make sure any invalid song entry paths are removed.
-    logger.log("Validating cached song paths...",true);
-    auto cached_entries_deleted {std::erase_if(song_entry_path_cache,
-        [&] (std::filesystem::path& path)
-        //incase the user modified the json file on their own, make sure things are correct
-        {return !std::filesystem::is_regular_file(path) || !validate_filetype(path,logger);})};
-    logger.log("Validation finished, " + std::to_string(cached_entries_deleted) + " entries removed due to being invalid.",true);
+    // logger.log("Validating cached song paths...",true);
+
+    // auto cached_entries_deleted {std::erase_if(song_entry_path_cache,
+    //     [&] (std::filesystem::path& path)
+    //     //incase the user modified the json file on their own, make sure things are correct
+    //     {return !std::filesystem::is_regular_file(path) || !validate_filetype(path,logger);})};
+    // logger.log("Validation finished, " + std::to_string(cached_entries_deleted) + " entries removed due to being invalid.",true);
 
     //make sure any user paths that may have been deleted will be erased 
     for(auto& entry : user_paths_entries){if (!std::filesystem::is_directory(entry)) entry = "";}
