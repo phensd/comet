@@ -39,6 +39,7 @@ int main() {
 
     //the main song selector
     auto song_selector {Menu(&song_manager.public_song_ids,&engine.selected) | frame};
+    // auto song_selector {Collapsible("All songs",song_selector_in) | frame};
 
 
     //create the menu option manually so we can modify the on_change callback
@@ -184,7 +185,8 @@ int main() {
                                 seek_forward_button->Render(),
                                 next_song_forward_button->Render()
                             ),
-                            border(gauge( (!engine.current_song_id.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253))) | size(HEIGHT,EQUAL,3)
+                            border(gauge( (!engine.current_song_id.empty() ? engine.get_current_timestamp_seconds() / engine.get_current_song_length_seconds() : 0))  | color(Color(182,193,253))) | size(HEIGHT,EQUAL,3),
+                            text(logger.error_message_topmost())
 
                         ) | flex,
                         //make progress bar align (sorta) with end of the panels

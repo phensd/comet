@@ -7,6 +7,7 @@
 #include <mutex>
 #include <unistd.h>
 #include "include/mpris_handler.h"
+#include "include/miniaudio_error_map.h"
 
 void comet::player::start_song(std::vector<std::string>::iterator song_title_itr,unsigned long long timestamp){
      //if a song is playing unload it
@@ -15,14 +16,25 @@ void comet::player::start_song(std::vector<std::string>::iterator song_title_itr
         ma_sound_uninit(&current_song);
     } 
 
-    current_song_id = *song_title_itr;
 
-    ma_sound_init_from_file(&engine, smanager.id_to_song_map[(*song_title_itr).c_str()].full_path.c_str(), MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH ,NULL,NULL,&current_song);
-    ma_sound_start(&current_song);
-    ma_sound_seek_to_pcm_frame(&current_song,timestamp);
+    
+    ma_result result { ma_sound_init_from_file(&engine,
+    smanager.id_to_song_map[(*song_title_itr).c_str()].full_path.c_str(),
+                            MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH ,
+                            NULL,
+                            NULL,
+                            &current_song)};
 
-    //Make sure the song we started playing is selected in the player
-    visually_select(*song_title_itr);
+    if(result == MA_SUCCESS){
+        ma_sound_start(&current_song);
+        ma_sound_seek_to_pcm_frame(&current_song,timestamp);
+        current_song_id = *song_title_itr;
+        //Make sure the song we started playing is selected in the player
+        visually_select(*song_title_itr);
+    }else{
+        lgr.push_error_message(miniaudio_error_string.at(result));
+        current_song_id = "";
+    }
 
 }
 

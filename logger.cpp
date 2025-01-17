@@ -25,5 +25,18 @@ bool comet::logger::log(const std::string& message,bool output_to_cerr){
     return true;
 }
 
+
+//for displaying errors to the user on the bottom of the screen.
+std::string comet::logger::error_message_topmost(){
+    return error_queue.size() > 0 ? error_queue.front() : "";
+};
+
+size_t comet::logger::error_message_count(){
+    return error_queue.size();
+}
+
+void comet::logger::push_error_message(std::string error_message){
+    error_queue.push("ERROR: " + error_message);
+}
 comet::logger::logger(){
 }
