@@ -119,17 +119,22 @@ std::vector<std::filesystem::path> comet::filesystem_manager::find_song_entries(
                     //more than 4 takes way too long, so dont go deeper
                     if(itr.depth() > 4){ itr.disable_recursion_pending();};
 
+                    //don't process directories as files of course
+                    if(entry.is_directory()) continue;
+                    
                     //validate that we can actually use the filetype before we add it
                     if(validate_filetype(entry.path(),logger)){
                         logger.log("Found entry in " + path + " " +  (std::string) entry.path(),true);
                         to_return.insert(entry.path());
                     }else {
                         logger.log("Invalid audio format (cannot be read by miniaudio) - " + (std::string) entry.path(),true);
+                        logger.push_error_message("Not a valid audio format - " + (std::string) entry.path().filename());
                     }
                 
                 };
             }catch(std::filesystem::filesystem_error){
                 logger.log("Filesystem error, probably no permission. Aborting",true);
+                logger.push_error_message("Filesystem error, probably no permission. - " + path);
                 continue;
             }
         }

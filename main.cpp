@@ -36,10 +36,7 @@ int main() {
     auto tab_menu = Toggle(&tab_values, &tab_selected);
 
 
-
-    //the main song selector
     auto song_selector {Menu(&song_manager.public_song_ids,&engine.selected) | frame};
-    // auto song_selector {Collapsible("All songs",song_selector_in) | frame};
 
 
     //create the menu option manually so we can modify the on_change callback
@@ -244,10 +241,12 @@ int main() {
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(0.1s);
 
-        error_message_display_text = logger.error_message_topmost();
-        //show the amount of errors
-        if(logger.error_message_count() > 1){
-            error_message_display_text += " [" + std::to_string(logger.error_message_count()) + "]";
+        if(!logger.error_message_topmost().empty()){
+            error_message_display_text = logger.error_message_topmost();
+            //show the amount of errors
+            if(logger.error_message_count() > 1){
+                error_message_display_text += " [" + std::to_string(logger.error_message_count()) + "]";
+            }
         }
 
         //various things that need to refresh frequently 
