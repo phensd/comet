@@ -28,7 +28,15 @@ bool comet::logger::log(const std::string& message,bool output_to_cerr){
 void comet::logger::pop_error_messages(){
     if(error_message_count() < 1) return;
 
-    error_timer_current -= 0.1f;
+
+    auto decrement {0.1f};
+
+    //more messages, go faster
+    if(error_message_count() > 5){
+        decrement += (0.15 * ((float)error_message_count()/5));
+    }
+
+    error_timer_current -= decrement;
     if(error_timer_current <= 0){
         error_queue.pop();
         error_timer_current = error_timer_max;
