@@ -241,6 +241,12 @@ int main() {
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(0.1s);
 
+
+        //remove errors from the display over time
+        logger.pop_error_messages();
+
+        //Only update UI if the message will not be empty.
+        //I believe this fixes an awkward flickering
         if(!logger.error_message_topmost().empty()){
             error_message_display_text = logger.error_message_topmost();
             //show the amount of errors

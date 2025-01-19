@@ -191,9 +191,6 @@ void comet::player::active_refresh(std::string_view current_song_display,std::ve
         //update volume of song
         ma_sound_set_volume(&current_song,get_volume());
     };
-
-    //remove errors from the display over time
-    lgr.pop_error_messages();
     
     //display number of songs found in the tab
     tab_values[0] = (std::string) "Songs" + "(" + std::to_string(smanager.public_song_ids.size()) + ")";
