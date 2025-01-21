@@ -211,7 +211,12 @@ void comet::player::apply_search_filter(){
 
 void comet::player::visually_select(std::string id){
     auto found {std::find(smanager.public_song_ids.begin(),smanager.public_song_ids.end(),id)};
-    if(found != smanager.public_song_ids.end()) selected = found - smanager.public_song_ids.begin();
+    if(found != smanager.public_song_ids.end()) {
+        selected = found - smanager.public_song_ids.begin();
+    }else{
+        //default to the top of the list if nothing was found
+        selected = 0;
+    }
 }
 
 void comet::player::clear_search(){
