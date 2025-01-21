@@ -241,22 +241,27 @@ int main() {
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(0.1s);
 
+        screen.Post( [&] {
 
-        //remove errors from the display over time
-        logger.pop_error_messages();
+            //remove errors from the display over time
+            logger.pop_error_messages();
 
-        //Only update UI if the message will not be empty.
-        //I believe this fixes an awkward flickering
-        if(!logger.error_message_topmost().empty()){
-            error_message_display_text = logger.error_message_topmost();
-            //show the amount of errors
-            if(logger.error_message_count() > 1){
-                error_message_display_text += " [" + std::to_string(logger.error_message_count()) + "]";
+            //Only update UI if the message will not be empty.
+            //I believe this fixes an awkward flickering
+            if(!logger.error_message_topmost().empty()){
+                error_message_display_text = logger.error_message_topmost();
+                //show the amount of errors
+                if(logger.error_message_count() > 1){
+                    error_message_display_text += " [" + std::to_string(logger.error_message_count()) + "]";
+                }
             }
-        }
 
-        //various things that need to refresh frequently 
-        screen.Post( [&] { engine.active_refresh(engine.current_song_id,tab_values);});
+            //various things that need to refresh frequently in the player
+            engine.active_refresh(engine.current_song_id,tab_values);
+
+             
+             
+        });
         screen.Post(Event::Custom);
     }
   });
