@@ -105,12 +105,13 @@ std::vector<std::filesystem::path> comet::filesystem_manager::find_song_entries(
     for(auto const& path : user_paths_entries){
         //verify that the path actually exists
         if(!std::filesystem::is_directory(path)){
-            logger.log("Invalid path entered (may be a default path set by program, not a big deal, ignoring) - " + path,true);
+            logger.log("Invalid path entered - " + path,true);
+            if(path.size() > 1) logger.push_error_message("Invalid path entered - " + path);
         }else{
             logger.log("Valid user entry path - " + path,true);
 
             //create the iterator, go recursively
-            auto itr { std::filesystem::recursive_directory_iterator(path) };
+            auto itr { std::filesystem::recursive_directory_iterator(path)};
 
             //wrapped in a try block, incase we encounter an error
             try {
