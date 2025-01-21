@@ -1,10 +1,8 @@
 #pragma once
-
-
 #include <functional>
 #include <mutex>
 #include <queue>
-#include "player.h"
+#include "../../include/player.h"
 
 namespace comet {
     class mpris_signal_handler{
@@ -26,6 +24,7 @@ namespace comet {
         private:
             std::queue<signal> signals;
 
+            //This class's methods will be accessed from multiple threads so we have a mutex just in case.
             std::mutex signals_mutex;
 
 

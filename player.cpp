@@ -4,11 +4,8 @@
 #include "include/util.h"
 #include <algorithm>
 #include <cctype>
-#include <mutex>
 #include <unistd.h>
-#include "include/mpris_handler.h"
 #include "include/miniaudio_error_map.h"
-
 void comet::player::start_song(std::string song_title,unsigned long long timestamp){
      //if a song is playing unload it
     if(!current_song_id.empty()){

@@ -1,5 +1,5 @@
 #include "include/mpris_handler.h"
-#include "dbus/mpris.h"
+#include "../dbus/mpris.h"
 #include "glib.h"
 #include "include/mpris_signal_handler.h"
 #include <cstddef>

@@ -1,5 +1,5 @@
 #pragma once
-#include "player.h"
+#include "../../include/player.h"
 
 
 namespace comet::mpris_function{

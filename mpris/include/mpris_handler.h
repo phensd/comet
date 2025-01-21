@@ -1,6 +1,6 @@
 #pragma once
 #include <glib.h>
-#include "../dbus/mpris.h"
+#include "../../dbus/mpris.h"
 #include "gio/gio.h"
 #include "mpris_signal_handler.h"
 

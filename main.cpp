@@ -1,6 +1,6 @@
 #define MINIAUDIO_IMPLEMENTATION
-#include "include/mpris_signal_handler.h"
-#include "include/mpris_handler.h"
+#include "mpris/include/mpris_signal_handler.h"
+#include "mpris/include/mpris_handler.h"
 #include "include/song_manager.h"
 #include <ftxui/component/component_options.hpp>
 #include <cstdlib>
