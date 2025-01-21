@@ -1,4 +1,5 @@
 #define MINIAUDIO_IMPLEMENTATION
+#include "include/mpris_signal_handler.h"
 #include "include/mpris_handler.h"
 #include "include/song_manager.h"
 #include <ftxui/component/component_options.hpp>
@@ -23,8 +24,9 @@ int main() {
     comet::logger logger{};
     comet::filesystem_manager fsysmanager {logger};
     comet::song_manager song_manager{fsysmanager,logger};
+    comet::mpris_signal_handler signal_handler;
     comet::player engine {logger,fsysmanager,song_manager};
-    comet::mpris_handler mpris_handler {&engine};
+    comet::mpris_handler mpris_handler {&signal_handler};
     
     auto screen = ScreenInteractive::Fullscreen();
 
@@ -242,6 +244,12 @@ int main() {
         std::this_thread::sleep_for(0.1s);
 
         screen.Post( [&] {
+
+            //handle MPRIS signals and execute the functions that are passed over.
+            auto signal_function {signal_handler.pulse()};
+            if(signal_function.has_value()){
+                signal_function.value()(&engine);
+            }
 
             //remove errors from the display over time
             logger.pop_error_messages();

@@ -1,12 +1,13 @@
 #include "include/mpris_handler.h"
 #include "dbus/mpris.h"
+#include "glib.h"
+#include "include/mpris_signal_handler.h"
 #include <cstddef>
 
 
-comet::mpris_handler::mpris_handler(player* comet_player){
+comet::mpris_handler::mpris_handler(comet::mpris_signal_handler* signal_handler){
 
-    this->comet_player = comet_player;
-
+    this->signal_handler = signal_handler;
 
     loop = g_main_loop_new(NULL, FALSE);
 
@@ -34,15 +35,34 @@ void comet::mpris_handler::handle_method_call (GDBusConnection       *connection
                 {
                     if (g_strcmp0 (method_name, "Play") == 0)
                     {
-                        comet_player->mpris_function_play();
+                        // comet_player->mpris_function_play();
+                        signal_handler->push_signal(comet::mpris_signal_handler::signal::PLAY);
                         comet_media_player2_player_complete_play(skeleton, invocation);
 
                     }
 
                     if (g_strcmp0 (method_name, "PlayPause") == 0)
                     {
-                        comet_player->mpris_function_playpause();
+                        signal_handler->push_signal(comet::mpris_signal_handler::signal::PLAY_PAUSE);
+                        // comet_player->mpris_function_playpause();
                         comet_media_player2_player_complete_play_pause(skeleton, invocation);
+                    }
+
+
+                    //these two do not follow the specification strictly but for now i do not mind.
+                    if (g_strcmp0 (method_name, "Next") == 0)
+                    {
+                        // comet_player->play_next();
+                        signal_handler->push_signal(comet::mpris_signal_handler::signal::PLAY_NEXT);
+
+                        comet_media_player2_player_complete_next(skeleton, invocation);
+                    }
+                     if (g_strcmp0 (method_name, "Previous") == 0)
+                    {
+                        signal_handler->push_signal(comet::mpris_signal_handler::signal::PREVIOUS);
+
+                        // comet_player->play_next(false);
+                        comet_media_player2_player_complete_previous(skeleton, invocation);
                     }
 
 
@@ -78,7 +98,8 @@ GVariant* comet::mpris_handler::handle_get_property(GDBusConnection  *connection
 
                         if (g_strcmp0 (property_name, "Volume") == 0)
                         {
-                        ret = g_variant_new_double (comet_player->get_volume());
+                        //Temporary value while I handle encapsulation
+                        ret = g_variant_new_double (0.0f);
                         }
 
                         return ret;
@@ -102,8 +123,8 @@ gboolean comet::mpris_handler::handle_set_property (GDBusConnection  *connection
                             
                             auto volume {g_variant_get_double(value)};
 
-
-                            comet_player->set_volume(volume);
+                            //Temporary value while I handle encapsulation
+                            // comet_player->set_volume(volume);
 
                             g_dbus_connection_emit_signal (connection,
                                          NULL,
@@ -127,7 +148,6 @@ void comet::mpris_handler::on_name_acquired(GDBusConnection *connection, const g
 
 
     skeleton = comet_media_player2_player_skeleton_new();
-    
 
     // g_signal_connect(skeleton, "handle_play", G_CALLBACK(on_handle_play), NULL);
 
@@ -136,6 +156,10 @@ void comet::mpris_handler::on_name_acquired(GDBusConnection *connection, const g
         connection,
         "/org/mpris/MediaPlayer2",
         NULL);
+}
+
+void comet::mpris_handler::emit_property_changed(){
+
 }
 
 void comet::mpris_handler::run(){

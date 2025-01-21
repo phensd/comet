@@ -44,6 +44,8 @@ add_executable(comet
               song_manager.cpp
               ../dbus/mpris.c
               mpris_handler.cpp
+              mpris_function.cpp
+              mpris_signal_handler.cpp
               )
 
 

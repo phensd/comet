@@ -2,13 +2,13 @@
 #include <glib.h>
 #include "../dbus/mpris.h"
 #include "gio/gio.h"
-#include "player.h"
+#include "mpris_signal_handler.h"
 
 namespace comet {
     class mpris_handler{
 
     GMainLoop* loop;
-    inline static player* comet_player;
+    inline static mpris_signal_handler* signal_handler;
 
     inline static cometMediaPlayer2Player* skeleton;
 
@@ -65,9 +65,9 @@ namespace comet {
         void run();
         void stop();
        
-        mpris_handler(player* comet_player);
+        mpris_handler(mpris_signal_handler* signal_handler);
 
-        // static void emit_property_changed();
+        static void emit_property_changed();
 
 };
 

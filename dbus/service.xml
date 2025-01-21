@@ -5,6 +5,10 @@
     </method>
     <method name="PlayPause">
     </method>
+    <method name="Next">
+    </method>
+    <method name="Previous">
+    </method>
     <property name="Volume" type="d" access="readwrite" />
   </interface>
 </node>
