@@ -31,6 +31,10 @@ void comet::mpris_function::mpris_function_play_or_pause(player *player){
     player->handle_pause_button();
 }
 
-void comet::mpris_function::mpris_function_play_next(player *player, bool forward){
-    player->play_next(forward);
+void comet::mpris_function::mpris_function_play_next(player *player){
+    player->play_next(true);
+}
+
+void comet::mpris_function::mpris_function_previous(player *player){
+    player->play_next(false);
 }
