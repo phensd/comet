@@ -9,7 +9,7 @@
 #include "include/mpris_handler.h"
 #include "include/miniaudio_error_map.h"
 
-void comet::player::start_song(std::vector<std::string>::iterator song_title_itr,unsigned long long timestamp){
+void comet::player::start_song(std::string song_title,unsigned long long timestamp){
      //if a song is playing unload it
     if(!current_song_id.empty()){
         ma_sound_stop(&current_song);
@@ -19,7 +19,7 @@ void comet::player::start_song(std::vector<std::string>::iterator song_title_itr
 
     
     ma_result result { ma_sound_init_from_file(&engine,
-    smanager.id_to_song_map[(*song_title_itr).c_str()].full_path.c_str(),
+    smanager.id_to_song_map[(song_title).c_str()].full_path.c_str(),
                             MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_NO_SPATIALIZATION | MA_SOUND_FLAG_NO_PITCH ,
                             NULL,
                             NULL,
@@ -28,9 +28,9 @@ void comet::player::start_song(std::vector<std::string>::iterator song_title_itr
     if(result == MA_SUCCESS){
         ma_sound_start(&current_song);
         ma_sound_seek_to_pcm_frame(&current_song,timestamp);
-        current_song_id = *song_title_itr;
+        current_song_id = song_title;
         //Make sure the song we started playing is selected in the player
-        visually_select(*song_title_itr);
+        visually_select(song_title);
     }else{
         lgr.push_error_message(miniaudio_error_string.at(result));
         current_song_id = "";
@@ -46,7 +46,7 @@ bool comet::player::try_song_loadback(){
     if(loadback.empty()) return false;
     for(size_t i {0}; i < song_ids.size(); i++){
         if(smanager.id_to_song_map[song_ids.at(i)].full_path == loadback.path){
-            start_song(i + song_ids.begin(),loadback.pcm_timestamp);
+            start_song(*(i + song_ids.begin()),loadback.pcm_timestamp);
             //dont start playing the song instantly as the program opens
             handle_pause_button();
             return true;
@@ -116,18 +116,18 @@ void comet::player::play_next(bool forward){
     if(forward){
         //check if going one song forward would bring us to the end, if not then start the next song
         if(entry_found && (itr - song_ids->begin()) + 1 < song_ids->size()){
-            start_song(itr + 1);
+            start_song(*(itr + 1));
         }else{
             //if it does bring us to the end, loop back around to the beginning
-            start_song(song_ids->begin());
+            start_song(*song_ids->begin());
         }
     }else{
         //ditto but backwards, if going backwards would not bring us to the beginning of the list, then go backwards 
         if(entry_found && ( (itr - song_ids->begin()) - 1 ) >= 0){
-            start_song(itr - 1);
+            start_song(*(itr - 1));
         }else{
             //if it does, then loop back around to the end
-            start_song(song_ids->end()-1);
+            start_song(*(song_ids->end()-1));
         }
 
     }
@@ -173,7 +173,7 @@ bool comet::player::handle_play_button(){
     if(smanager.public_song_ids.size() < 1 ) return true;
     //no song playing, play the currently highlighted song
     if(current_song_id.empty() || current_selection_is_not_playing()) {
-        start_song( smanager.public_song_ids.begin() + selected);
+        start_song( *(smanager.public_song_ids.begin() + selected));
         return true;
     } 
 
@@ -303,7 +303,7 @@ void comet::player::mpris_function_play(){
 
     //Starts or resumes playback.
     if(current_song_id.empty() || current_selection_is_not_playing()) {
-        start_song( smanager.public_song_ids.begin() + selected);
+        start_song( *(smanager.public_song_ids.begin() + selected));
         return;
     } 
 
