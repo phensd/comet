@@ -290,39 +290,6 @@ void comet::player::toggle_player_state(player_response_state desired_state){
 }
 
 
-
-//functions tailored to the mpris specification.
-// https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html
-void comet::player::mpris_function_play(){
-
-    //"If CanPlay is false, attempting to call this method should have no effect."    
-    //todo
-
-    //"If there is no track to play, this has no effect."
-    if(smanager.public_song_ids.size() < 1 ) return;
-
-    //Starts or resumes playback.
-    if(current_song_id.empty() || current_selection_is_not_playing()) {
-        start_song( *(smanager.public_song_ids.begin() + selected));
-        return;
-    } 
-
-    //"If already playing, this has no effect.""
-    if(song_playing()){
-        return;
-    }else{
-    //"If paused, playback resumes from the current position."
-        start_loaded_song();
-    }
-
-    return;
-}
-
-void comet::player::mpris_function_playpause(){
-    //this happens to fit.
-    handle_pause_button();
-}
-
 comet::player::player(logger& logger, filesystem_manager& fsysmanager,class song_manager& smanager) : fsysmanager(fsysmanager),  smanager(smanager) , lgr(logger){
     ma_engine_init(NULL,&engine);
     logger.log(try_song_loadback() ? "Loaded previously playing song from JSON successfully - " + fsysmanager.get_song_loadback().path : "");

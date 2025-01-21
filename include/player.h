@@ -54,11 +54,12 @@ namespace  comet {
             std::string play_button_text {"➤"};
             void visually_select(std::string id);
 
+            const song_manager& get_song_manager() {return smanager;};
 
 
 
 
-            void start_song(const std::vector<std::string>::iterator song_title_itr,unsigned long long timestamp=0);
+            void start_song(std::string song_title,unsigned long long timestamp=0);
 
             void increase_volume(float value);
             void set_volume(double value);
@@ -105,9 +106,6 @@ namespace  comet {
             bool song_playing() {{return !current_song_id.empty() ? ma_sound_is_playing(&current_song) : false;}}
 
 
-            //mpris specification functions
-            void mpris_function_play();
-            void mpris_function_playpause();
 
             player(logger& logger,filesystem_manager& fsysmanager,class song_manager& song_manager);
 
