@@ -34,9 +34,13 @@ Then, select how you want the songs to be displayed and press "Scan Directories"
 
 
 
+# Dependencies
+Most of comet's dependencies are pulled through the CMake script. </br>
+You will need ``g++`` and ``cmake``, of course. </br>
+Other than that, make sure you have the packages ``glib2`` and ``glib2-devel`` installed on your system.
+
 
 # Installation
-
 Run the following commands to compile & install comet:
 ```
 git clone https://github.com/phensd/comet.git
