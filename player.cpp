@@ -87,9 +87,22 @@ void comet::player::seek_percentage(float interval, bool forward) {
     ma_uint64 length {};
     ma_sound_get_length_in_pcm_frames(&current_song, &length);
 
+    auto increase {length*interval};
+
+    unsigned long long song_length;
+    ma_sound_get_length_in_pcm_frames(&current_song, &song_length);
+
+    //if going back would set us to the beginning then just restart
+    //so the next song doesn't start playing.
+    if(ma_sound_get_time_in_pcm_frames(&current_song) - increase <= 0 && !forward) {
+        restart();
+        return;
+    }
+    // if(ma_sound_get_time_in_pcm_frames(&current_song) + increase > song_length) increase = 
+
     forward ? 
-    ma_sound_seek_to_pcm_frame(&current_song,ma_sound_get_time_in_pcm_frames(&current_song) + (length*interval)):
-    ma_sound_seek_to_pcm_frame(&current_song,ma_sound_get_time_in_pcm_frames(&current_song) - (length*interval));
+    ma_sound_seek_to_pcm_frame(&current_song,ma_sound_get_time_in_pcm_frames(&current_song) + (increase)):
+    ma_sound_seek_to_pcm_frame(&current_song,ma_sound_get_time_in_pcm_frames(&current_song) - (increase));
     
     ma_sound_start(&current_song);
 
